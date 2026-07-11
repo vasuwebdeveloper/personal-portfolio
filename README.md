@@ -33,8 +33,39 @@ npm run generate:banner -- <slug> "<title>" "<TAG · TAG>"  # blog banner + OG c
 3. `npm run build`. The route, sitemap entry, index row, and metadata are all
    generated from the content layer automatically.
 
-Deploy by pointing any static host (GitHub Pages, Netlify, Vercel, S3…) at
-the `out/` directory.
+## Deployment
+
+Hosted on Vercel (free Hobby tier) with Git integration — there is no manual
+deploy step:
+
+- **Push to `main`** → production deploy at https://vasukasipuri.vercel.app
+- **Push to any other branch** → a unique preview URL per commit
+- Deploys, logs, and settings: https://vercel.com → project `vasukasipuri`
+  (repo: https://github.com/vasuwebdeveloper/personal-portfolio)
+
+The site URL lives in exactly ONE place: the `NEXT_PUBLIC_SITE_URL` env var,
+with a fallback constant in `lib/site.ts`. Everything absolute — metadataBase,
+canonical URLs, Open Graph URLs, `sitemap.xml`, `robots.txt` — derives from it
+at build time.
+
+### Attaching the custom domain later
+
+1. Buy the domain (e.g. `vasukasipuri.com`) at any registrar.
+2. Vercel dashboard → project `vasukasipuri` → **Settings → Domains** → add
+   the domain (add both `vasukasipuri.com` and `www.vasukasipuri.com`; set the
+   apex as **primary**).
+3. At the registrar, create the DNS records exactly as the Domains screen
+   instructs (an `A` record for the apex, `CNAME` for `www`), then wait for
+   Vercel to show the domain as verified.
+4. Update `NEXT_PUBLIC_SITE_URL` to `https://vasukasipuri.com` in Vercel →
+   **Settings → Environment Variables** (Production + Preview), and update the
+   fallback in `lib/site.ts` to match.
+5. Push (or redeploy) — sitemap, robots, canonicals, and OG URLs all switch to
+   the new domain in one build.
+6. Verify `https://vasukasipuri.vercel.app` now 308-redirects to the primary
+   domain (Vercel does this automatically once a primary domain is set).
+7. Add the domain to Google Search Console and submit
+   `https://vasukasipuri.com/sitemap.xml`.
 
 ## Architecture
 
@@ -49,6 +80,8 @@ content/          ← ALL site content, typed like future database tables
 lib/
   content.ts      ← THE ONLY module allowed to import from /content.
                     Async accessors — the seam where Prisma slots in.
+  site.ts         ← SITE_URL (NEXT_PUBLIC_SITE_URL + fallback) — the single
+                    source of truth for the site's public URL.
 components/
   layout/         ← SiteHeader, SiteFooter
   sections/       ← one component per homepage section
@@ -110,8 +143,8 @@ Search the repo for `[TODO: Vasu` — each marker sits next to the exact line
 to change:
 
 - `content/flagship.ts` — outcomes/metrics + screenshot or demo link for SYS-001
-- `content/site.ts` — production domain, GitHub username spelling,
-  Hyderabad vs Bengaluru
+- `content/site.ts` — GitHub username spelling, Hyderabad vs Bengaluru
+  (the production URL is handled by `lib/site.ts` — see Deployment)
 - `content/certifications.ts` — remaining certifications + earned years
 - `public/resume.pdf` — drop in the real (architect-positioned) PDF. Resume
   links auto-hide while the file is missing and reappear on the next build.
