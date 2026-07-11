@@ -6,6 +6,7 @@ import {
   estimateReadingMinutes,
   getPostBySlug,
   getPosts,
+  getSiteProfile,
 } from "@/lib/content";
 
 /**
@@ -28,6 +29,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const profile = await getSiteProfile();
   const images = post.banner ? [{ url: post.banner.src }] : undefined;
   return {
     title: post.title,
@@ -37,6 +39,9 @@ export async function generateMetadata({
       type: "article",
       title: post.title,
       description: post.summary,
+      authors: [profile.name],
+      publishedTime: post.publishedAt ?? undefined,
+      modifiedTime: post.updatedAt,
       images,
     },
     twitter: {
