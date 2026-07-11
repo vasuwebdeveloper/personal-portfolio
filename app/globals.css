@@ -1,0 +1,284 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+ * "Green-Bar" design tokens
+ * The site reads as an ERP continuous-feed report: ledger paper, hairline
+ * rules, ink, and a single vermilion "stamp" reserved for the AI signal layer.
+ * ------------------------------------------------------------------------- */
+@theme {
+  --color-paper: #faf9f2;
+  --color-band: #e9efe4;
+  --color-rule: #c9d4c5;
+  --color-rule-strong: #8fa48b;
+  --color-ink: #17231d;
+  --color-ink-muted: #54655a;
+  --color-stamp: #b23a18;
+  --color-stamp-deep: #9c3110;
+  --color-annotate: #2242a8;
+}
+
+@theme inline {
+  --font-display: var(--font-besley), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-public-sans), system-ui, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "Cascadia Mono", Consolas,
+    monospace;
+}
+
+/* ------------------------------------------------------------------ base */
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+::selection {
+  background-color: var(--color-stamp);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-annotate);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ components */
+@layer components {
+  /* Continuous-feed green-bar banding: one band every other 2rem row. */
+  .greenbar {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      var(--color-band) 0,
+      var(--color-band) 2rem,
+      transparent 2rem,
+      transparent 4rem
+    );
+  }
+
+  /* Tractor-feed perforation strip (punched holes every 2rem). */
+  .tractor-feed {
+    background-image:
+      radial-gradient(circle at center, var(--color-paper) 3.5px, transparent 4.25px),
+      radial-gradient(circle at center, var(--color-rule) 4.75px, transparent 5.5px);
+    background-size: 100% 2rem;
+    background-repeat: repeat-y;
+    background-position: center top;
+  }
+
+  /* Vermilion audit stamp. */
+  .stamp {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-stamp-deep);
+    border: 1px solid currentColor;
+    padding: 0.125rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .stamp-tilt {
+    transform: rotate(-2deg);
+  }
+
+  /* Accounting totals: single rule above, double rule below. */
+  .rule-total {
+    border-top: 1px solid var(--color-ink);
+    border-bottom: 3px double var(--color-ink);
+  }
+
+  /* Mono metadata label, e.g. "ACCT 2100" or column headers. */
+  .meta-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  /* Body links: ballpoint-blue annotation ink. */
+  .link-annotate {
+    color: var(--color-annotate);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--color-annotate) 45%, transparent);
+  }
+
+  .link-annotate:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* -------------------------------------------------- schematic (SYS-001) */
+/* The routing schematic is progressively enhanced: with no JS (or reduced
+ * motion) it renders as a complete static diagram. The client component adds
+ * data attributes that gate every animation below. */
+
+.schematic .node {
+  fill: var(--color-paper);
+  stroke: var(--color-ink);
+  stroke-width: 1.25;
+}
+
+.schematic .node-band {
+  fill: var(--color-band);
+  stroke: var(--color-ink);
+  stroke-width: 1.25;
+}
+
+.schematic .trace {
+  fill: none;
+  stroke: var(--color-rule-strong);
+  stroke-width: 1.25;
+}
+
+.schematic .label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  fill: var(--color-ink);
+}
+
+.schematic .sublabel {
+  font-family: var(--font-mono);
+  fill: var(--color-ink-muted);
+  letter-spacing: 0.06em;
+}
+
+.schematic .query-text {
+  font-family: var(--font-mono);
+  fill: var(--color-ink);
+}
+
+.schematic .signal {
+  fill: none;
+  stroke: var(--color-stamp);
+  stroke-width: 2.5;
+  stroke-linecap: butt;
+  opacity: 0;
+  stroke-dasharray: 14 200;
+  stroke-dashoffset: 15;
+}
+
+.schematic .agent-dot {
+  fill: var(--color-stamp);
+  opacity: 0;
+}
+
+/* Draw-in on first view (only when .animate-in is added by the client). */
+.schematic.animate-in .trace {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: trace-draw 900ms ease-out forwards;
+}
+
+.schematic.animate-in .layer-route .trace { animation-delay: 150ms; }
+.schematic.animate-in .layer-fetch .trace { animation-delay: 300ms; }
+.schematic.animate-in .layer-erp .trace { animation-delay: 450ms; }
+
+@keyframes trace-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* A signal pulse travels along a normalized (pathLength=100) trace. */
+@keyframes signal-travel {
+  from { stroke-dashoffset: 15; opacity: 1; }
+  to { stroke-dashoffset: -101; opacity: 1; }
+}
+
+.schematic[data-phase="ingest"] .sig-ingest {
+  animation: signal-travel 650ms linear forwards;
+}
+
+.schematic[data-phase="route"] .is-active .sig-route {
+  animation: signal-travel 650ms linear forwards;
+}
+
+.schematic[data-phase="fetch"] .is-active .sig-fetch {
+  animation: signal-travel 550ms linear forwards;
+}
+
+.schematic[data-phase="fetch"] .sig-erp {
+  animation: signal-travel 550ms linear forwards;
+  animation-delay: 350ms;
+}
+
+.schematic[data-phase="return"] .sig-erp,
+.schematic[data-phase="return"] .is-active .sig-fetch {
+  animation: signal-travel 550ms linear reverse forwards;
+}
+
+.schematic[data-phase="return"] .is-active .sig-route {
+  animation: signal-travel 650ms linear reverse forwards;
+  animation-delay: 300ms;
+}
+
+.schematic[data-phase="synthesize"] .node-orchestrator {
+  animation: node-pulse 900ms ease-in-out;
+}
+
+.schematic[data-phase="fetch"] .is-active .agent-dot,
+.schematic[data-phase="return"] .is-active .agent-dot {
+  animation: dot-blink 700ms ease-in-out infinite;
+}
+
+@keyframes node-pulse {
+  0%, 100% { stroke: var(--color-ink); stroke-width: 1.25; }
+  50% { stroke: var(--color-stamp); stroke-width: 2.25; }
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+/* Active agents get a vermilion accent while working. */
+.schematic .agent .node {
+  transition: stroke 300ms ease;
+}
+
+.schematic[data-phase="fetch"] .is-active .node,
+.schematic[data-phase="return"] .is-active .node,
+.schematic[data-phase="route"] .is-active .node {
+  stroke: var(--color-stamp);
+  stroke-width: 1.75;
+}
+
+/* Query text crossfades when the schematic advances to the next query. */
+.schematic.animate-in .query-text {
+  animation: query-fade 350ms ease-out;
+}
+
+@keyframes query-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --------------------------------------------------------------- motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

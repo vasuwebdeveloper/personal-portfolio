@@ -1,0 +1,31 @@
+{
+  "name": "vasu-kasipuri-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portfolio of Vasu Kasipuri — NetSuite Architect building production-grade agentic AI for enterprise finance.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "npx serve@latest out",
+    "generate:og": "node scripts/generate-og.mjs",
+    "generate:portrait": "node scripts/generate-portrait.mjs",
+    "generate:banner": "node scripts/generate-blog-banner.mjs"
+  },
+  "dependencies": {
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.16",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^5.9.3"
+  }
+}
