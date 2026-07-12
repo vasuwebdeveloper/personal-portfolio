@@ -1,7 +1,48 @@
+import AskConcierge from "@/components/concierge/AskConcierge";
 import SectionHeading from "@/components/ui/SectionHeading";
 import type { SiteProfile } from "@/content/types";
+import {
+  getCertifications,
+  getFlagshipCaseStudy,
+  getPosts,
+  getSkillPillars,
+} from "@/lib/content";
 
-export default function AboutContact({ profile }: { profile: SiteProfile }) {
+export default async function AboutContact({
+  profile,
+}: {
+  profile: SiteProfile;
+}) {
+  const [certifications, pillars, flagship, posts] = await Promise.all([
+    getCertifications(),
+    getSkillPillars(),
+    getFlagshipCaseStudy(),
+    getPosts(),
+  ]);
+
+  const conciergeFacts = {
+    name: profile.name,
+    role: profile.role,
+    identity: profile.identity,
+    thesis: profile.thesis,
+    guardrailLine: `${flagship.guardrails.split(". ")[0]}.`,
+    email: profile.email,
+    location: profile.location,
+    hasResume: Boolean(profile.resumePath),
+    links: profile.links.map((l) => ({ label: l.label, href: l.href })),
+    pillars: pillars.map((p) => `${p.code} ${p.title} — ${p.thesis}`),
+    certifications: certifications.map(
+      (c) => `${c.title} — ${c.issuer}${c.earnedYear ? ` · ${c.earnedYear}` : ""}`,
+    ),
+    stack: flagship.stack,
+    posts: posts.map((p) => ({ title: p.title, status: p.status })),
+    flagship: {
+      code: flagship.code,
+      title: flagship.title,
+      agentNames: flagship.agents.map((a) => a.name),
+    },
+  };
+
   return (
     <section
       id="contact"
@@ -96,6 +137,11 @@ export default function AboutContact({ profile }: { profile: SiteProfile }) {
           ) : null}
           </dl>
         </div>
+      </div>
+
+      {/* ASK-000 — the deterministic concierge (the joke IS the brand). */}
+      <div className="mt-12">
+        <AskConcierge facts={conciergeFacts} />
       </div>
     </section>
   );
