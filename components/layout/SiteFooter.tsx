@@ -7,16 +7,11 @@ export default function SiteFooter({ profile }: { profile: SiteProfile }) {
     <footer className="mt-24">
       <div className="mx-auto max-w-6xl px-5 pb-10 sm:px-8">
         {/* Closing entry — the ledger's totals row. */}
-        <div className="rule-total py-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-            <span className="meta-label">Closing entry · FY{year}</span>
-            <span className="font-mono text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-stamp-deep">
-              All sections reconciled ✓
-            </span>
-          </div>
-          <p className="meta-label mt-1.5">
-            Drafted in pair with Claude Code — human architecture, agent hands.
-          </p>
+        <div className="rule-total flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 py-3">
+          <span className="meta-label">Closing entry · FY{year}</span>
+          <span className="font-mono text-[0.6875rem] font-medium tracking-[0.14em] uppercase text-stamp-deep">
+            All sections reconciled ✓
+          </span>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 pt-4">
           <p className="font-mono text-xs text-ink-muted">
