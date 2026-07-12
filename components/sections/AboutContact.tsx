@@ -1,7 +1,40 @@
+import AskConcierge from "@/components/concierge/AskConcierge";
 import SectionHeading from "@/components/ui/SectionHeading";
 import type { SiteProfile } from "@/content/types";
+import {
+  getCertifications,
+  getFlagshipCaseStudy,
+  getSkillPillars,
+} from "@/lib/content";
 
-export default function AboutContact({ profile }: { profile: SiteProfile }) {
+export default async function AboutContact({
+  profile,
+}: {
+  profile: SiteProfile;
+}) {
+  const [certifications, pillars, flagship] = await Promise.all([
+    getCertifications(),
+    getSkillPillars(),
+    getFlagshipCaseStudy(),
+  ]);
+
+  const conciergeFacts = {
+    name: profile.name,
+    role: profile.role,
+    email: profile.email,
+    location: profile.location,
+    hasResume: Boolean(profile.resumePath),
+    pillars: pillars.map((p) => `${p.code} ${p.title} — ${p.thesis}`),
+    certifications: certifications.map(
+      (c) => `${c.title} — ${c.issuer}${c.earnedYear ? ` · ${c.earnedYear}` : ""}`,
+    ),
+    flagship: {
+      code: flagship.code,
+      title: flagship.title,
+      agentNames: flagship.agents.map((a) => a.name),
+    },
+  };
+
   return (
     <section
       id="contact"
@@ -96,6 +129,11 @@ export default function AboutContact({ profile }: { profile: SiteProfile }) {
           ) : null}
           </dl>
         </div>
+      </div>
+
+      {/* ASK-000 — the deterministic concierge (the joke IS the brand). */}
+      <div className="mt-12">
+        <AskConcierge facts={conciergeFacts} />
       </div>
     </section>
   );
