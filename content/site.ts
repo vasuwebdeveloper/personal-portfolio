@@ -3,7 +3,7 @@ import type { SiteProfile } from "./types";
 
 export const siteProfile: SiteProfile = {
   name: "Vasu Kasipuri",
-  role: "NetSuite Architect · Agentic AI for Enterprise Finance",
+  role: "NetSuite Architect · Agentic AI",
   identity:
     "NetSuite Architect building production-grade agentic AI for enterprise finance — 12+ years automating ERP and revenue at scale.",
   thesis:
