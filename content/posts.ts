@@ -17,6 +17,100 @@ import type { Post } from "./types";
  */
 export const posts: Post[] = [
   {
+    id: "post_groq_first_call",
+    slug: "first-llm-api-call-groq",
+    title: "Your first LLM API call: console to completion on Groq",
+    summary:
+      "Making your first LLM API call? Console to key to a working chat completion in about twenty minutes on Groq's free tier — and why the usage object is the only part of the response worth bookmarking.",
+    body: `Groq's pitch is speed — OpenAI-compatible inference served fast enough that you stop thinking about latency. That makes it the console I'd point anyone at for their first LLM API call: the free tier is real, the API shape is the one every SDK already speaks, and the distance from "signed up" to "working chat completion" is about twenty minutes. Here's the whole walk, screenshot by screenshot.
+
+## The console
+
+Signing up lands you in a console that gets to the point: a playground, docs, and a token-usage panel that starts counting from your first request. The usage chart is the part I appreciate — spend is visible from day one, not at invoice time.
+
+![The Groq console after signing in — playground, docs, and a token-usage panel from day one](/images/blog/groq-first-call/01-console.png "=1600x714")
+
+## One key, shown once
+
+API keys live under their own tab, and a fresh account has none.
+
+![The API Keys page before any keys exist](/images/blog/groq-first-call/02-apikeys.png "=1482x362")
+
+Creating one asks for a display name and an expiration. Name keys for the thing that uses them — once there are twelve of these, "test-key-2" is how leaks go unnoticed.
+
+![Creating an API key: display name and expiration](/images/blog/groq-first-call/03-createkey.png "=907x560")
+
+The key is displayed exactly once. Copy it into your shell's environment and close the dialog — it never belongs in a file, a repo, or a screenshot. The one below is blank on purpose: any key that has been on a screen should be treated as burned and regenerated.
+
+![The created key — shown exactly once, and redacted here](/images/blog/groq-first-call/04-key-created.png "=1600x841")
+
+\`\`\`bash
+export GROQ_API_KEY="gsk_..."   # PowerShell: $env:GROQ_API_KEY = "gsk_..."
+\`\`\`
+
+## The call itself
+
+The endpoint is OpenAI-compatible, so the first call is one curl:
+
+\`\`\`bash
+curl https://api.groq.com/openai/v1/chat/completions \\
+  -H "Authorization: Bearer $GROQ_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "llama-3.3-70b-versatile",
+    "messages": [{"role": "user", "content": "Say hello in exactly five words."}]
+  }'
+\`\`\`
+
+Same call in Python with the official SDK (\`pip install groq\`):
+
+\`\`\`python
+import os
+
+from groq import Groq
+
+client = Groq(api_key=os.environ["GROQ_API_KEY"])
+
+response = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[
+        {
+            "role": "user",
+            "content": "One sentence: why does every finance team "
+            "ask an ERP for invoice aging first?",
+        }
+    ],
+)
+
+print(response.choices[0].message.content)
+print(response.usage)
+\`\`\`
+
+Two parts of the response deserve more attention than the answer text. \`choices[0].message.content\` is the reply; \`usage\` is the ledger line — prompt tokens, completion tokens, total. If you make one API call in your life, still print \`usage\`: it is the unit of account every [cost model](/blog/real-cost-of-llms-in-production/) is built on, and the numbers roll up into that console usage chart above.
+
+If the model name has moved on by the time you read this, ask the API instead of a tutorial:
+
+\`\`\`bash
+curl -s https://api.groq.com/openai/v1/models \\
+  -H "Authorization: Bearer $GROQ_API_KEY"
+\`\`\`
+
+## What this actually sets up
+
+The twenty minutes were the easy 80%. A working key and a chat completion is not an AI system — it's a socket. Everything that makes it production-grade happens around this call: guardrails on what it's allowed to touch, observability on what it did, and a cost model that treats \`usage\` as a line item instead of a surprise. That's the 20% the rest of this ledger is about.`,
+    tags: ["Groq", "LLM", "API"],
+    status: "published",
+    banner: {
+      src: "/blog/banners/first-llm-api-call-groq.png",
+      alt: "Your first LLM API call: console to completion on Groq",
+      width: 1200,
+      height: 630,
+    },
+    publishedAt: "2026-07-12T00:00:00.000Z",
+    createdAt: "2026-07-12T00:00:00.000Z",
+    updatedAt: "2026-07-12T00:00:00.000Z",
+  },
+  {
     id: "post_rag_internals",
     slug: "rag-internals-embeddings-layer",
     title: "RAG internals: what the embeddings layer is actually doing",

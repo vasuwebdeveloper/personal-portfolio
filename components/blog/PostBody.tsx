@@ -94,16 +94,25 @@ export default async function PostBody({ markdown }: { markdown: string }) {
             aria-hidden="true"
           />
         ),
-        img: (props) => (
-          // Alt text comes from the Markdown itself: ![alt](src)
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            loading="lazy"
-            decoding="async"
-            className="mt-6 h-auto w-full border border-rule"
-            {...props}
-          />
-        ),
+        img: ({ title, ...props }) => {
+          // Alt text comes from the Markdown itself: ![alt](src).
+          // A title of the form "=WIDTHxHEIGHT" declares intrinsic size so
+          // images reserve their space from first paint (zero CLS):
+          //   ![alt](/path.png "=1600x714")
+          const size = title?.match(/^=(\d+)x(\d+)$/);
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              loading="lazy"
+              decoding="async"
+              width={size ? Number(size[1]) : undefined}
+              height={size ? Number(size[2]) : undefined}
+              title={size ? undefined : title}
+              className="mt-6 h-auto w-full border border-rule"
+              {...props}
+            />
+          );
+        },
         code: (props) => (
           <code
             className="rounded-none bg-band px-1.5 py-0.5 font-mono text-[0.85em]"
