@@ -1,59 +1,106 @@
 "use client";
 
 /**
- * The site's signature element: a live routing schematic of SYS-001.
+ * The site's signature element: a live routing schematic of SYS-001, run as
+ * a self-looping demonstration of the query lifecycle.
  *
- * A canned natural-language query travels from the query box to the
- * orchestrator, fans out to the agents that own the answer, reaches NetSuite
- * through the MCP bus, and returns for synthesis. All motion is CSS
+ * Each cycle: a natural-language query types itself into the query node
+ * (Phase A), the orchestrator routes it and only the relevant agent paths
+ * illuminate in sequence (Phase B), data fetches over MCP and returns, and a
+ * synthesized answer streams token-by-token into the answer chip (Phase C),
+ * holds, then the next query begins (Phase D). Signal motion is CSS
  * (stroke-dashoffset over pathLength-normalized traces) gated by data
- * attributes — with JavaScript disabled or prefers-reduced-motion set, the
- * component renders as a complete static diagram.
+ * attributes; the typewriter and token stream are two small intervals. The
+ * loop pauses off-viewport via IntersectionObserver. With JavaScript
+ * disabled or prefers-reduced-motion set, the component renders the
+ * completed state statically: query shown, route lit, answer displayed.
  *
  * Geometry lives in the two layout constants below; content (agents and
- * queries) comes from the content layer via props.
+ * queries) comes from the content layer via props. The answer strings are
+ * demo choreography — deliberately illustrative, keyed by content-layer
+ * query id, and NOT part of the table-shaped content model.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AgentSpec, ExampleQuery } from "@/content/types";
 
 type Phase =
   | "idle"
+  | "type"
   | "ingest"
   | "route"
   | "fetch"
   | "return"
   | "synthesize"
+  | "answer"
   | "hold";
 
 const NEXT_PHASE: Record<Exclude<Phase, "idle">, Phase> = {
+  type: "ingest",
   ingest: "route",
   route: "fetch",
   fetch: "return",
   return: "synthesize",
-  synthesize: "hold",
-  hold: "ingest",
+  synthesize: "answer",
+  answer: "hold",
+  hold: "type",
 };
 
-const PHASE_DURATION_MS: Record<Exclude<Phase, "idle">, number> = {
-  ingest: 750,
-  route: 800,
-  fetch: 1500,
-  return: 1250,
-  synthesize: 1000,
-  hold: 1900,
+const TYPE_MS_PER_CHAR = 26;
+const ANSWER_MS_PER_TOKEN = 110;
+
+/** Illustrative demo output per query — plausible, never real client data. */
+const DEMO_ANSWERS: Record<string, string> = {
+  q_aging: "14 invoices · ₹8.2L · 3 flagged",
+  q_bills: "9 bills open · ₹5.6L due",
+  q_deferred: "₹42.3L deferred · 6 rows",
+  q_pos: "5 POs waiting · oldest 11 days",
+  q_quarter: "AR ↓12% · AP flat · brief ready",
 };
+const FALLBACK_ANSWER = "synthesized · sources cited";
+
+function phaseDurationMs(
+  phase: Exclude<Phase, "idle">,
+  promptLength: number,
+  tokenCount: number,
+  activeCount: number,
+): number {
+  switch (phase) {
+    case "type":
+      return promptLength * TYPE_MS_PER_CHAR + 550;
+    case "ingest":
+      return 750;
+    case "route":
+      return 700 + Math.max(0, activeCount - 1) * 200;
+    case "fetch":
+      return 1500;
+    case "return":
+      return 1250;
+    case "synthesize":
+      return 1050;
+    case "answer":
+      return tokenCount * ANSWER_MS_PER_TOKEN + 400;
+    case "hold":
+      return 2400;
+  }
+}
 
 /* ------------------------------------------------------ desktop geometry */
 const D = {
   viewBox: "0 0 960 560",
   query: { x: 290, y: 24, w: 380, h: 44 },
+  answer: { x: 690, y: 24, w: 250, h: 44 },
   orch: { x: 360, y: 148, w: 240, h: 52 },
   agent: { y: 300, w: 148, h: 52, gap: 30 },
   busY: 244, // horizontal routing bus between orchestrator and agents
   mcp: { x: 50, y: 420, w: 860, h: 32 },
   ns: { x: 390, y: 500, w: 180, h: 48 },
 };
+
+// Synthesized answer returns from the orchestrator's right edge up to the chip.
+const D_SYNTH_PATH = `M${D.orch.x + D.orch.w},${D.orch.y + 26} H${
+  D.answer.x + D.answer.w / 2
+} V${D.answer.y + D.answer.h}`;
 
 function desktopAgentCenterX(index: number, count: number): number {
   const totalW = count * D.agent.w + (count - 1) * D.agent.gap;
@@ -63,7 +110,7 @@ function desktopAgentCenterX(index: number, count: number): number {
 
 /* ------------------------------------------------------- mobile geometry */
 const M = {
-  viewBox: "0 0 360 608",
+  viewBox: "0 0 360 668",
   query: { x: 20, y: 20, w: 320, h: 40 },
   orch: { x: 70, y: 92, w: 220, h: 48 },
   row: { x: 96, w: 220, h: 44, startY: 176, gap: 12 },
@@ -71,7 +118,11 @@ const M = {
   rightRailX: 340,
   mcp: { x: 20, y: 476, w: 320, h: 32 },
   ns: { x: 90, y: 544, w: 180, h: 44 },
+  // On the phone spine the answer reads as the closing totals row.
+  answer: { x: 20, y: 608, w: 320, h: 44 },
 };
+
+const M_SYNTH_PATH = `M180,${M.ns.y + M.ns.h} V${M.answer.y}`;
 
 function mobileRowTop(index: number): number {
   return M.row.startY + index * (M.row.h + M.row.gap);
@@ -87,40 +138,104 @@ export default function AgentSchematic({
   const orchestrator = agents.find((a) => a.slug === "orchestrator");
   const specialists = agents.filter((a) => a.slug !== "orchestrator");
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [animate, setAnimate] = useState(false);
+  const [inView, setInView] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
   const [queryIndex, setQueryIndex] = useState(0);
+  const [typedChars, setTypedChars] = useState(0);
+  const [answerTokens, setAnswerTokens] = useState(0);
+
+  const query = queries[queryIndex];
+  const answer = DEMO_ANSWERS[query.id] ?? FALLBACK_ANSWER;
+  const answerTokenList = answer.split(" ");
+  const activeSlugs = new Set(query.targetAgentSlugs);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setAnimate(true);
-    // Let the trace draw-in finish before the first query runs.
-    const timer = setTimeout(() => setPhase("ingest"), 1400);
+    // Let the trace draw-in finish before the first query types.
+    const timer = setTimeout(() => setPhase("type"), 1400);
     return () => clearTimeout(timer);
   }, []);
 
+  // Pause the loop while the schematic is off-viewport — no background burn.
   useEffect(() => {
-    if (!animate || phase === "idle") return;
-    const timer = setTimeout(() => {
-      if (phase === "hold") {
-        setQueryIndex((i) => (i + 1) % queries.length);
-      }
-      setPhase(NEXT_PHASE[phase]);
-    }, PHASE_DURATION_MS[phase]);
-    return () => clearTimeout(timer);
-  }, [phase, animate, queries.length]);
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
-  const query = queries[queryIndex];
-  const activeSlugs = new Set(query.targetAgentSlugs);
-  const ariaLabel = `Architecture schematic: a natural-language query flows to the ${
+  useEffect(() => {
+    if (!animate || !inView || phase === "idle") return;
+
+    let interval: number | undefined;
+    if (phase === "type") {
+      interval = window.setInterval(() => {
+        setTypedChars((c) => Math.min(c + 1, query.prompt.length));
+      }, TYPE_MS_PER_CHAR);
+    } else if (phase === "answer") {
+      interval = window.setInterval(() => {
+        setAnswerTokens((t) => Math.min(t + 1, answerTokenList.length));
+      }, ANSWER_MS_PER_TOKEN);
+    }
+
+    const timer = window.setTimeout(
+      () => {
+        if (phase === "type") setTypedChars(query.prompt.length);
+        if (phase === "answer") setAnswerTokens(answerTokenList.length);
+        if (phase === "hold") {
+          setTypedChars(0);
+          setAnswerTokens(0);
+          setQueryIndex((i) => (i + 1) % queries.length);
+        }
+        setPhase(NEXT_PHASE[phase]);
+      },
+      phaseDurationMs(
+        phase,
+        query.prompt.length,
+        answerTokenList.length,
+        query.targetAgentSlugs.length,
+      ),
+    );
+
+    return () => {
+      if (interval !== undefined) window.clearInterval(interval);
+      window.clearTimeout(timer);
+    };
+  }, [phase, animate, inView, queryIndex, query, answerTokenList.length, queries.length]);
+
+  // Static fallbacks (SSR, no JS, reduced motion) show the completed state.
+  const shownQuery = animate ? query.prompt.slice(0, typedChars) : query.prompt;
+  const shownAnswer = animate
+    ? answerTokenList.slice(0, answerTokens).join(" ")
+    : answer;
+  const typingCaret = animate && phase === "type";
+  const answerCaret = animate && phase === "answer";
+
+  const ariaLabel = `Architecture schematic, shown as a self-running demonstration with illustrative data: a natural-language query flows to the ${
     orchestrator?.name ?? "Orchestrator"
   }, which routes it across ${specialists
     .map((a) => a.name)
-    .join(", ")} — each reaching NetSuite through MCP.`;
+    .join(", ")} — each reaching NetSuite through MCP — and returns a synthesized answer.`;
+
+  const staggerStyle = (agentSlug: string): React.CSSProperties | undefined => {
+    if (!activeSlugs.has(agentSlug)) return undefined;
+    const activeOrder = specialists
+      .filter((a) => activeSlugs.has(a.slug))
+      .findIndex((a) => a.slug === agentSlug);
+    return { "--stagger": `${activeOrder * 200}ms` } as React.CSSProperties;
+  };
 
   return (
     <figure className="m-0">
       <div
+        ref={rootRef}
         className={`schematic${animate ? " animate-in" : ""}`}
         data-phase={phase}
       >
@@ -166,6 +281,9 @@ export default function AgentSchematic({
               d={`M480,${D.mcp.y + D.mcp.h} V${D.ns.y}`}
             />
           </g>
+          <g className="layer-synth">
+            <path className="trace" pathLength={100} d={D_SYNTH_PATH} />
+          </g>
 
           {/* signals (one per trace, animated by phase) */}
           <path className="signal sig-ingest" pathLength={100} d="M480,68 V148" />
@@ -174,6 +292,7 @@ export default function AgentSchematic({
             pathLength={100}
             d={`M480,${D.mcp.y + D.mcp.h} V${D.ns.y}`}
           />
+          <path className="signal sig-synth" pathLength={100} d={D_SYNTH_PATH} />
 
           {/* query box */}
           <text className="sublabel" x={D.query.x} y={16} fontSize={8.5}>
@@ -187,14 +306,34 @@ export default function AgentSchematic({
             height={D.query.h}
           />
           <text
-            key={queryIndex}
             className="query-text"
-            x={480}
+            x={D.query.x + 14}
             y={D.query.y + 27}
             fontSize={13}
-            textAnchor="middle"
           >
-            {query.prompt}
+            {shownQuery}
+            {typingCaret && <tspan className="caret">_</tspan>}
+          </text>
+
+          {/* synthesized answer chip */}
+          <text className="sublabel" x={D.answer.x} y={16} fontSize={8.5}>
+            SYNTHESIS · ILLUSTRATIVE
+          </text>
+          <rect
+            className="node node-answer"
+            x={D.answer.x}
+            y={D.answer.y}
+            width={D.answer.w}
+            height={D.answer.h}
+          />
+          <text
+            className="answer-text"
+            x={D.answer.x + 12}
+            y={D.answer.y + 27}
+            fontSize={11.5}
+          >
+            {shownAnswer}
+            {answerCaret && <tspan className="caret">_</tspan>}
           </text>
 
           {/* orchestrator */}
@@ -235,6 +374,7 @@ export default function AgentSchematic({
               <g
                 key={agent.id}
                 className={`agent${active ? " is-active" : ""}`}
+                style={staggerStyle(agent.slug)}
               >
                 <path
                   className="signal sig-route"
@@ -327,7 +467,7 @@ export default function AgentSchematic({
           </text>
         </svg>
 
-        {/* Mobile layout (vertical spine) */}
+        {/* Mobile layout (vertical spine — answer closes the report at the bottom) */}
         <svg
           viewBox={M.viewBox}
           role="img"
@@ -368,6 +508,9 @@ export default function AgentSchematic({
               d={`M180,${M.mcp.y + M.mcp.h} V${M.ns.y}`}
             />
           </g>
+          <g className="layer-synth">
+            <path className="trace" pathLength={100} d={M_SYNTH_PATH} />
+          </g>
 
           <path className="signal sig-ingest" pathLength={100} d="M180,60 V92" />
           <path
@@ -375,6 +518,7 @@ export default function AgentSchematic({
             pathLength={100}
             d={`M180,${M.mcp.y + M.mcp.h} V${M.ns.y}`}
           />
+          <path className="signal sig-synth" pathLength={100} d={M_SYNTH_PATH} />
 
           <text className="sublabel" x={M.query.x} y={14} fontSize={8.5}>
             NL QUERY
@@ -387,14 +531,13 @@ export default function AgentSchematic({
             height={M.query.h}
           />
           <text
-            key={queryIndex}
             className="query-text"
-            x={180}
+            x={M.query.x + 12}
             y={M.query.y + 25}
             fontSize={11}
-            textAnchor="middle"
           >
-            {query.prompt}
+            {shownQuery}
+            {typingCaret && <tspan className="caret">_</tspan>}
           </text>
 
           <g className="orchestrator">
@@ -433,6 +576,7 @@ export default function AgentSchematic({
               <g
                 key={agent.id}
                 className={`agent${active ? " is-active" : ""}`}
+                style={staggerStyle(agent.slug)}
               >
                 <path
                   className="signal sig-route"
@@ -514,6 +658,32 @@ export default function AgentSchematic({
           >
             system of record
           </text>
+
+          {/* synthesized answer chip */}
+          <rect
+            className="node node-answer"
+            x={M.answer.x}
+            y={M.answer.y}
+            width={M.answer.w}
+            height={M.answer.h}
+          />
+          <text
+            className="sublabel"
+            x={M.answer.x + 12}
+            y={M.answer.y + 15}
+            fontSize={7.5}
+          >
+            SYNTHESIS · ILLUSTRATIVE
+          </text>
+          <text
+            className="answer-text"
+            x={M.answer.x + 12}
+            y={M.answer.y + 32}
+            fontSize={10.5}
+          >
+            {shownAnswer}
+            {answerCaret && <tspan className="caret">_</tspan>}
+          </text>
         </svg>
       </div>
 
@@ -521,7 +691,7 @@ export default function AgentSchematic({
         <span className="meta-label text-stamp-deep">Fig. 01</span>
         <span className="font-mono text-[0.6875rem] tracking-[0.06em] text-ink-muted">
           SYS-001 routing schematic — live query delegation across subledger
-          agents
+          agents · illustrative demo data
         </span>
       </figcaption>
     </figure>

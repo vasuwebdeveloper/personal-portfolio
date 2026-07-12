@@ -209,6 +209,7 @@ body {
 .schematic.animate-in .layer-route .trace { animation-delay: 150ms; }
 .schematic.animate-in .layer-fetch .trace { animation-delay: 300ms; }
 .schematic.animate-in .layer-erp .trace { animation-delay: 450ms; }
+.schematic.animate-in .layer-synth .trace { animation-delay: 600ms; }
 
 @keyframes trace-draw {
   to { stroke-dashoffset: 0; }
@@ -224,8 +225,11 @@ body {
   animation: signal-travel 650ms linear forwards;
 }
 
+/* Routing signals fire in sequence — each active agent's group carries a
+ * --stagger custom property set inline by the component. */
 .schematic[data-phase="route"] .is-active .sig-route {
   animation: signal-travel 650ms linear forwards;
+  animation-delay: var(--stagger, 0ms);
 }
 
 .schematic[data-phase="fetch"] .is-active .sig-fetch {
@@ -249,6 +253,11 @@ body {
 
 .schematic[data-phase="synthesize"] .node-orchestrator {
   animation: node-pulse 900ms ease-in-out;
+}
+
+.schematic[data-phase="synthesize"] .sig-synth {
+  animation: signal-travel 550ms linear forwards;
+  animation-delay: 450ms;
 }
 
 .schematic[data-phase="fetch"] .is-active .agent-dot,
@@ -278,14 +287,64 @@ body {
   stroke-width: 1.75;
 }
 
-/* Query text crossfades when the schematic advances to the next query. */
-.schematic.animate-in .query-text {
-  animation: query-fade 350ms ease-out;
+/* Synthesized-answer chip: a dashed pending slot until the answer lands. */
+.schematic .node-answer {
+  stroke: var(--color-rule-strong);
+  stroke-dasharray: 4 3;
+  transition: stroke 300ms ease;
 }
 
-@keyframes query-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.schematic[data-phase="answer"] .node-answer,
+.schematic[data-phase="hold"] .node-answer {
+  stroke: var(--color-stamp);
+  stroke-dasharray: none;
+  stroke-width: 1.75;
+}
+
+.schematic .answer-text {
+  font-family: var(--font-mono);
+  fill: var(--color-stamp-deep);
+  letter-spacing: 0.02em;
+}
+
+/* Typewriter / token-stream caret. */
+.schematic .caret {
+  fill: var(--color-stamp);
+  animation: caret-blink 900ms step-end infinite;
+}
+
+@keyframes caret-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* Completed state for no-JS and prefers-reduced-motion (the client never
+ * adds .animate-in there): query shown, active route lit end-to-end,
+ * answer displayed. */
+.schematic:not(.animate-in) .sig-ingest,
+.schematic:not(.animate-in) .sig-erp,
+.schematic:not(.animate-in) .sig-synth,
+.schematic:not(.animate-in) .is-active .sig-route,
+.schematic:not(.animate-in) .is-active .sig-fetch {
+  opacity: 1;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  stroke-width: 1.5;
+}
+
+.schematic:not(.animate-in) .is-active .node {
+  stroke: var(--color-stamp);
+  stroke-width: 1.75;
+}
+
+.schematic:not(.animate-in) .is-active .agent-dot {
+  opacity: 1;
+}
+
+.schematic:not(.animate-in) .node-answer {
+  stroke: var(--color-stamp);
+  stroke-dasharray: none;
+  stroke-width: 1.75;
 }
 
 /* --------------------------------------------------------------- motion */
