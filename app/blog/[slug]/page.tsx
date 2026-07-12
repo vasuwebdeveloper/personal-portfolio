@@ -193,11 +193,6 @@ export default async function BlogPostPage({
             {post.tags.join(" · ")}
           </p>
 
-          {/* Closing share row */}
-          <div className="mt-8 border-t border-rule pt-5">
-            <ShareRow url={postUrl} title={post.title} />
-          </div>
-
           {/* Filed by — compact author card */}
           <div className="mt-10 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border border-rule px-5 py-4">
             <div className="max-w-[52ch]">
