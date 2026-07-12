@@ -3,8 +3,10 @@ import type { PageSlice } from "@/lib/blog";
 
 const linkClass =
   "font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-ink-muted transition-colors hover:text-stamp-deep";
+// Layout placeholder for an absent direction — keeps the ledger line
+// centered without painting low-contrast "disabled" text.
 const disabledClass =
-  "font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-rule-strong";
+  "invisible font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase";
 
 /** Ledger-styled pagination: "Page 2 of 3 · entries 11–20 of 24". */
 export default function Pager({ slice }: { slice: PageSlice }) {
