@@ -1,5 +1,4 @@
 import SectionHeading from "@/components/ui/SectionHeading";
-import ToolContract from "@/components/ui/ToolContract";
 import type { CaseStudy } from "@/content/types";
 
 function Paragraphs({ text }: { text: string }) {
@@ -127,9 +126,6 @@ export default function FlagshipCaseStudy({
               </div>
             </div>
           ) : null}
-
-          {/* Fig. 03 — what "explicit, typed, and enumerable" looks like */}
-          <ToolContract />
 
           {/* Stack line */}
           <div className="mt-12 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t border-rule pt-4">
