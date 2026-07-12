@@ -98,7 +98,12 @@ export const skillPillars: SkillPillar[] = [
     items: [
       "Agentic systems",
       "Model Context Protocol (MCP)",
+      "LangGraph",
+      "LangChain",
+      "LangSmith",
+      "CrewAI",
       "RAG & embeddings",
+      "AI observability",
       "LLM integration POCs",
       "Python",
     ],
