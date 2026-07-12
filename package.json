@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/verify-og.mjs",
     "preview": "npx serve@latest out",
     "generate:og": "node scripts/generate-og.mjs",
     "generate:portrait": "node scripts/generate-portrait.mjs",

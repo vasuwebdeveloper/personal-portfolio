@@ -65,6 +65,14 @@ export default async function RootLayout({
       className={`${besley.variable} ${publicSans.variable} ${plexMono.variable}`}
     >
       <body className="min-h-screen antialiased">
+        {/* Hoisted to <head> by React — page-level `alternates` metadata
+            would silently replace this if it lived in generateMetadata. */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={`Writing — ${profile.name}`}
+          href="/feed.xml"
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-paper focus:px-4 focus:py-2 focus:font-mono focus:text-sm"
