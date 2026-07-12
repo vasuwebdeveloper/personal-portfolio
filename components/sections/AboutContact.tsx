@@ -4,6 +4,7 @@ import type { SiteProfile } from "@/content/types";
 import {
   getCertifications,
   getFlagshipCaseStudy,
+  getPosts,
   getSkillPillars,
 } from "@/lib/content";
 
@@ -12,22 +13,29 @@ export default async function AboutContact({
 }: {
   profile: SiteProfile;
 }) {
-  const [certifications, pillars, flagship] = await Promise.all([
+  const [certifications, pillars, flagship, posts] = await Promise.all([
     getCertifications(),
     getSkillPillars(),
     getFlagshipCaseStudy(),
+    getPosts(),
   ]);
 
   const conciergeFacts = {
     name: profile.name,
     role: profile.role,
+    identity: profile.identity,
+    thesis: profile.thesis,
+    guardrailLine: `${flagship.guardrails.split(". ")[0]}.`,
     email: profile.email,
     location: profile.location,
     hasResume: Boolean(profile.resumePath),
+    links: profile.links.map((l) => ({ label: l.label, href: l.href })),
     pillars: pillars.map((p) => `${p.code} ${p.title} — ${p.thesis}`),
     certifications: certifications.map(
       (c) => `${c.title} — ${c.issuer}${c.earnedYear ? ` · ${c.earnedYear}` : ""}`,
     ),
+    stack: flagship.stack,
+    posts: posts.map((p) => ({ title: p.title, status: p.status })),
     flagship: {
       code: flagship.code,
       title: flagship.title,
