@@ -19,7 +19,7 @@ npm run generate:portrait -- <photo>                     # regenerate public/por
 npm run generate:banner -- <slug> "<title>" "<TAG · TAG>"  # blog banner + OG card → public/blog/banners/<slug>.png
 ```
 
-There is no test suite and no lint script. `npm run build` is the verification gate.
+There is no test suite and no lint script. `npm run build` is the verification gate. It runs `postbuild` (`scripts/verify-og.mjs`) automatically: the build **fails** if any blog post's `og:image` is missing, falls back to the site-wide `/og.png`, or points at a file absent from `out/` — so every post must have its own banner (see "Adding a blog post" below). The gate also asserts `feed.xml` and `blog/search-index.json` made it into the export.
 
 ## Deployment
 
@@ -31,15 +31,18 @@ The load-bearing idea is a **content layer shaped like future database tables** 
 
 - `content/` — ALL site content as typed data files (`types.ts`, `site.ts`, `flagship.ts`, `skills.ts`, `certifications.ts`, `posts.ts`). Every interface in `content/types.ts` is deliberately table-shaped: stable `id`, `slug`, ISO timestamps, `sortOrder`.
 - `lib/content.ts` — **the ONLY module allowed to import from `/content`.** Components call its async accessors (`getPosts()`, `getSiteProfile()`, …) and never touch the data files. Every accessor is async even though data is in-memory today, so swapping the internals for Prisma queries later requires zero component changes. Keep this rule intact: never import from `@/content/*` in a component or page.
-- `components/` — `layout/` (SiteHeader, SiteFooter), `sections/` (one component per homepage section), `schematic/` (AgentSchematic, the animated SYS-001 routing diagram), `blog/PostBody.tsx` (renders post Markdown via react-markdown + remark-gfm, styled to the design system), `ui/` (small primitives).
-- `app/` — `page.tsx` (homepage, fetches everything via `lib/content`), `blog/` (index + `[slug]` with `generateStaticParams` and `dynamicParams = false`), `sitemap.ts`, `robots.ts`.
-- `scripts/` — Node scripts using `sharp` that render SVG designs to PNG/WebP assets. They hardcode the design-token hex values; if tokens change in `globals.css`, update the scripts to match.
+- `components/` — `layout/` (SiteHeader — the masthead nav is the site's "chart of accounts": each link carries the GL code its section uses in `SectionHeading`; SiteFooter), `sections/` (one component per homepage section), `schematic/` (AgentSchematic — the SYS-001 diagram runs a self-looping demo: typewriter query → staggered routing → token-streamed answer chip; the illustrative answers live in its `DEMO_ANSWERS` map keyed by content-layer query id, deliberately NOT in the content model), `concierge/` (AskConcierge, the ASK-000 deterministic keyword router — a client widget fed pre-shaped facts by the AboutContact server component, so the content seam holds), `blog/` (async PostBody with build-time Shiki highlighting + heading anchor ids, CodeBlock copy button, ShareRow, Toc, BlogExplorer client search/filter, Pager, PostListRows), `ui/` (small primitives).
+- `lib/blog.ts` — pure blog helpers (heading extraction/slugs, pagination, related-by-tag, date rules); no `/content` imports, everything arrives as arguments. `lib/highlight.ts` — Shiki singleton with the custom "green-bar" theme.
+- `app/` — `page.tsx` (homepage, fetches everything via `lib/content`), `blog/` (index + `[slug]` with `generateStaticParams` and `dynamicParams = false`; `page/[n]/` pagination at 10/page — with one page of posts it emits `/blog/page/1/` canonicalized to `/blog/` because `output: export` refuses zero params; `search-index.json/route.ts` force-static search index), `feed.xml/route.ts` (RSS 2.0, **published posts only** — validly empty while everything is draft), `sitemap.ts`, `robots.ts`.
+- `scripts/` — Node scripts using `sharp` that render SVG designs to PNG/WebP assets, plus `verify-og.mjs` (the postbuild gate). The asset scripts and `lib/highlight.ts` hardcode the design-token hex values; if tokens change in `globals.css`, update them to match.
 
 Behavioral details that aren't obvious from one file:
 
 - `lib/content.ts` nulls `resumePath` at build time when `public/resume.pdf` is missing, so resume links (hero, contact, footer) auto-hide and reappear on the next build once the PDF is dropped in.
-- Adding a blog post: copy the **POST TEMPLATE** block at the bottom of `content/posts.ts`, fill it in, add it to the array, then generate its banner with `npm run generate:banner`. Route, sitemap entry, index row, and metadata all derive from the content layer — no other files to touch.
-- Draft posts (`status: "draft"`) are returned by `getPosts()`; the UI decides how to render them.
+- Adding a blog post: copy the **POST TEMPLATE** block at the bottom of `content/posts.ts`, fill it in, add it to the array, then generate its banner with `npm run generate:banner`. The banner is **required** — the postbuild gate fails the build without it. Route, sitemap entry, index row, search index, feed entry, and metadata all derive from the content layer — no other files to touch.
+- Draft posts (`status: "draft"`) are returned by `getPosts()`; the UI decides how to render them. Drafts appear on the site (index + post pages, stamped "In draft") but are **excluded from `/feed.xml`** — publishing (`status: "published"` + `publishedAt`) is Vasu's decision and flips the feed, dates, and JSON-LD automatically.
+- Post ToC renders only for posts with 3+ H2s; related-entries renders only when posts share tags. Empty is correct behavior, not a bug.
+- Adding a flagship example query (`content/flagship.ts`) should come with a matching entry in `DEMO_ANSWERS` in `AgentSchematic.tsx` (illustrative, USD, ≤ ~31 chars) — otherwise the demo falls back to a generic answer line.
 
 ## Design system ("Green-Bar")
 
