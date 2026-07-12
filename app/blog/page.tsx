@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import BlogExplorer from "@/components/blog/BlogExplorer";
+import Pager from "@/components/blog/Pager";
+import PostListRows from "@/components/blog/PostListRows";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { getPosts } from "@/lib/content";
+import { paginatePosts, postDate } from "@/lib/blog";
+import { getPosts, getSiteProfile } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Writing",
@@ -11,10 +15,38 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogIndexPage() {
-  const posts = await getPosts();
+  const [posts, profile] = await Promise.all([getPosts(), getSiteProfile()]);
+  const slice = paginatePosts(posts, 1);
+  const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: `Writing — ${profile.name}`,
+    url: `${profile.siteUrl}/blog/`,
+    description: metadata.description,
+    author: {
+      "@type": "Person",
+      name: profile.name,
+      url: profile.siteUrl,
+      sameAs: profile.links.map((link) => link.href),
+    },
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      url: `${profile.siteUrl}/blog/${post.slug}/`,
+      datePublished: postDate(post),
+    })),
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
+      <script
+        type="application/ld+json"
+        // Static JSON derived from the content layer — no user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <SectionHeading code="4000" title="Writing" kicker="Index of record" />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
@@ -23,40 +55,11 @@ export default async function BlogIndexPage() {
         here as they become essays.
       </p>
 
-      <div className="mt-10 border-t border-rule">
-        {posts.map((post) => (
-          <article
-            key={post.id}
-            className="grid gap-x-12 gap-y-3 border-b border-rule py-7 md:grid-cols-[1fr_auto]"
-          >
-            <div>
-              <h2 className="font-display text-xl font-semibold tracking-tight">
-                <Link
-                  href={`/blog/${post.slug}/`}
-                  className="transition-colors hover:text-stamp-deep"
-                >
-                  {post.title}
-                </Link>
-              </h2>
-              <p className="mt-2 max-w-[72ch] text-[0.9375rem] leading-relaxed text-ink-muted">
-                {post.summary}
-              </p>
-              <p className="mt-3 font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-ink-muted">
-                {post.tags.join(" · ")}
-              </p>
-            </div>
-            <div className="md:pt-1">
-              {post.status === "draft" ? (
-                <span className="stamp">In draft</span>
-              ) : (
-                <span className="font-mono text-[0.75rem] text-ink-muted">
-                  {post.publishedAt?.slice(0, 10)}
-                </span>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
+      <BlogExplorer tags={allTags}>
+        <PostListRows posts={slice.posts} />
+      </BlogExplorer>
+
+      <Pager slice={slice} />
 
       <p className="mt-8">
         <Link
