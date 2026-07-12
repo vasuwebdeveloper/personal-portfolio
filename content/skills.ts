@@ -104,7 +104,7 @@ export const skillPillars: SkillPillar[] = [
       "CrewAI",
       "RAG & embeddings",
       "AI observability",
-      "LLM integration POCs",
+      "LLM-backed routing & synthesis",
       "Python",
     ],
     sortOrder: 6,
