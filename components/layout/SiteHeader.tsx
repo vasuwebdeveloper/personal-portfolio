@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SiteProfile } from "@/content/types";
+import { getFlagshipCaseStudy } from "@/lib/content";
 
 const NAV_ITEMS = [
   { label: "Flagship", href: "/#flagship" },
@@ -9,7 +10,9 @@ const NAV_ITEMS = [
   { label: "Contact", href: "/#contact" },
 ] as const;
 
-export default function SiteHeader({ profile }: { profile: SiteProfile }) {
+export default async function SiteHeader({ profile }: { profile: SiteProfile }) {
+  const flagship = await getFlagshipCaseStudy();
+
   return (
     <header className="border-b border-rule">
       <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 py-4 sm:px-8">
@@ -21,6 +24,20 @@ export default function SiteHeader({ profile }: { profile: SiteProfile }) {
             {profile.role}
           </span>
         </Link>
+        <span
+          className="inline-flex items-center gap-2"
+          aria-label={`System status: ${flagship.code} online, ${flagship.agents.length} agents, MCP linked`}
+        >
+          <span className="status-dot" aria-hidden="true" />
+          <span className="font-mono text-[0.625rem] font-medium tracking-[0.16em] uppercase text-ink-muted">
+            {flagship.code}
+            <span className="hidden sm:inline"> online</span>
+            <span className="hidden lg:inline">
+              {" "}
+              · {flagship.agents.length} agents · MCP linked
+            </span>
+          </span>
+        </span>
         <nav aria-label="Primary">
           <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
             {NAV_ITEMS.map((item) => (

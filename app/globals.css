@@ -120,6 +120,27 @@ body {
   .link-annotate:hover {
     text-decoration-color: currentColor;
   }
+
+  /* Header system-status dot. Pure opacity pulse — the reduced-motion block
+   * at the bottom of this file clamps it to a single static frame. */
+  .status-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    flex: none;
+    border-radius: 9999px;
+    background-color: var(--color-stamp);
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 /* -------------------------------------------------- schematic (SYS-001) */
