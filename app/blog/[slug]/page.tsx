@@ -2,6 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PostBody from "@/components/blog/PostBody";
+import ShareRow from "@/components/blog/ShareRow";
+import Toc from "@/components/blog/Toc";
+import {
+  extractH2s,
+  formatDate,
+  postDate,
+  relatedPosts,
+  wasUpdated,
+} from "@/lib/blog";
 import {
   estimateReadingMinutes,
   getPostBySlug,
@@ -62,61 +71,227 @@ export default async function BlogPostPage({
   const post = await getPostBySlug(slug);
   if (!post) notFound();
 
+  const [posts, profile] = await Promise.all([getPosts(), getSiteProfile()]);
+  const postUrl = `${profile.siteUrl}/blog/${post.slug}/`;
+  const headings = extractH2s(post.body);
+  const showToc = headings.length >= 3;
+  const related = relatedPosts(post, posts);
+  const index = posts.findIndex((p) => p.id === post.id);
+  const newer = index > 0 ? posts[index - 1] : null;
+  const older = index < posts.length - 1 ? posts[index + 1] : null;
+  const linkedIn = profile.links.find((l) => l.label === "LinkedIn");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.summary,
+    datePublished: postDate(post),
+    dateModified: post.updatedAt,
+    url: postUrl,
+    mainEntityOfPage: postUrl,
+    ...(post.banner
+      ? { image: `${profile.siteUrl}${post.banner.src}` }
+      : {}),
+    author: {
+      "@type": "Person",
+      name: profile.name,
+      url: profile.siteUrl,
+      sameAs: profile.links.map((l) => l.href),
+    },
+  };
+
   return (
-    <article className="mx-auto max-w-3xl px-5 pt-12 sm:px-8 sm:pt-16">
-      {/* Banner plate — also the post's Open Graph card */}
-      {post.banner ? (
-        <figure className="mb-10 border border-rule">
-          <img
-            src={post.banner.src}
-            alt=""
-            width={post.banner.width}
-            height={post.banner.height}
-            className="block h-auto w-full"
-          />
-        </figure>
-      ) : null}
+    <div className="mx-auto max-w-5xl px-5 pt-12 sm:px-8 sm:pt-16">
+      <script
+        type="application/ld+json"
+        // Static JSON derived from the content layer — no user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <p className="meta-label text-stamp-deep">Writing / {post.tags[0]}</p>
-        <p className="flex items-baseline gap-4">
-          <span className="font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-ink-muted">
-            ~{estimateReadingMinutes(post)} min
-          </span>
-          {post.status === "draft" ? (
-            <span className="stamp stamp-tilt">In draft</span>
-          ) : (
-            <span className="font-mono text-[0.75rem] text-ink-muted">
-              {post.publishedAt?.slice(0, 10)}
+      <div
+        className={
+          showToc
+            ? "lg:grid lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-x-14"
+            : ""
+        }
+      >
+        <article className="max-w-[70ch]">
+          {/* Banner plate — also the post's Open Graph card. Decorative here:
+              the title it carries is the h1 right below. */}
+          {post.banner ? (
+            <figure className="mb-10 border border-rule">
+              <img
+                src={post.banner.src}
+                alt=""
+                width={post.banner.width}
+                height={post.banner.height}
+                className="block h-auto w-full"
+              />
+            </figure>
+          ) : null}
+
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <p className="meta-label text-stamp-deep">
+              Writing / {post.tags[0]}
+            </p>
+            {post.status === "draft" ? (
+              <span className="stamp stamp-tilt">In draft</span>
+            ) : null}
+          </div>
+
+          <h1 className="font-display mt-5 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
+            {post.title}
+          </h1>
+
+          <p className="mt-4 text-lg leading-relaxed text-ink-muted">
+            {post.summary}
+          </p>
+
+          {/* Document control block — the entry's own totals row. */}
+          <div className="rule-total mt-7 flex flex-wrap items-baseline gap-x-6 gap-y-2 py-3">
+            <span className="meta-label">
+              {post.status === "draft" ? "Drafted" : "Posted"}{" "}
+              <time
+                dateTime={postDate(post)}
+                className="text-ink normal-case tracking-[0.06em]"
+              >
+                {formatDate(postDate(post))}
+              </time>
             </span>
-          )}
-        </p>
+            {wasUpdated(post) ? (
+              <span className="meta-label">
+                Updated{" "}
+                <time
+                  dateTime={post.updatedAt}
+                  className="text-ink normal-case tracking-[0.06em]"
+                >
+                  {formatDate(post.updatedAt)}
+                </time>
+              </span>
+            ) : null}
+            <span className="meta-label">
+              ~{estimateReadingMinutes(post)} min read
+            </span>
+            <span className="ml-auto">
+              <ShareRow url={postUrl} title={post.title} />
+            </span>
+          </div>
+
+          {/* Contents — inline on small screens, aside on large. */}
+          {showToc ? (
+            <div className="mt-8 border-b border-rule pb-8 lg:hidden">
+              <Toc entries={headings} />
+            </div>
+          ) : null}
+
+          <div className="mt-8">
+            <PostBody markdown={post.body} />
+          </div>
+
+          <p className="mt-10 font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-ink-muted">
+            {post.tags.join(" · ")}
+          </p>
+
+          {/* Filed by — compact author card */}
+          <div className="mt-10 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border border-rule px-5 py-4">
+            <div className="max-w-[52ch]">
+              <p className="meta-label">Filed by</p>
+              <p className="mt-1.5 font-mono text-sm font-semibold tracking-[0.1em] uppercase">
+                {profile.name}
+              </p>
+              <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink-muted">
+                {profile.identity}
+              </p>
+            </div>
+            {linkedIn ? (
+              <a
+                href={linkedIn.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-annotate font-mono text-[0.8125rem]"
+              >
+                LinkedIn
+              </a>
+            ) : null}
+          </div>
+
+          {/* Related entries — shared tags only; absent when nothing shares. */}
+          {related.length > 0 ? (
+            <div className="mt-12">
+              <p className="meta-label text-stamp-deep">Related entries</p>
+              <ul className="mt-3 border-t border-rule">
+                {related.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-rule py-3.5"
+                  >
+                    <Link
+                      href={`/blog/${r.slug}/`}
+                      className="font-display font-semibold tracking-tight transition-colors hover:text-stamp-deep"
+                    >
+                      {r.title}
+                    </Link>
+                    <span className="font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-ink-muted">
+                      {r.tags.filter((t) => post.tags.includes(t)).join(" · ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Newer / older navigation */}
+          <nav
+            aria-label="Adjacent posts"
+            className="mt-12 grid gap-6 border-t border-rule pt-6 sm:grid-cols-2"
+          >
+            <div>
+              {newer ? (
+                <>
+                  <p className="meta-label">← Newer entry</p>
+                  <Link
+                    href={`/blog/${newer.slug}/`}
+                    className="mt-1.5 inline-block font-display font-semibold tracking-tight transition-colors hover:text-stamp-deep"
+                  >
+                    {newer.title}
+                  </Link>
+                </>
+              ) : null}
+            </div>
+            <div className="sm:text-right">
+              {older ? (
+                <>
+                  <p className="meta-label">Older entry →</p>
+                  <Link
+                    href={`/blog/${older.slug}/`}
+                    className="mt-1.5 inline-block font-display font-semibold tracking-tight transition-colors hover:text-stamp-deep"
+                  >
+                    {older.title}
+                  </Link>
+                </>
+              ) : null}
+            </div>
+          </nav>
+
+          <p className="mt-12">
+            <Link
+              href="/blog/"
+              className="font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-ink-muted transition-colors hover:text-stamp-deep"
+            >
+              ← All writing
+            </Link>
+          </p>
+        </article>
+
+        {showToc ? (
+          <aside className="hidden lg:block">
+            <div className="sticky top-10">
+              <Toc entries={headings} />
+            </div>
+          </aside>
+        ) : null}
       </div>
-
-      <h1 className="font-display mt-5 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
-        {post.title}
-      </h1>
-
-      <p className="mt-4 max-w-[64ch] text-lg leading-relaxed text-ink-muted">
-        {post.summary}
-      </p>
-
-      <div className="mt-8 border-t border-rule pt-8">
-        <PostBody markdown={post.body} />
-      </div>
-
-      <p className="mt-6 font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-ink-muted">
-        {post.tags.join(" · ")}
-      </p>
-
-      <p className="mt-12">
-        <Link
-          href="/blog/"
-          className="font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-ink-muted transition-colors hover:text-stamp-deep"
-        >
-          ← All writing
-        </Link>
-      </p>
-    </article>
+    </div>
   );
 }
