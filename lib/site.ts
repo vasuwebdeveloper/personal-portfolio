@@ -6,12 +6,12 @@
  * The URL is read at build time (`output: "export"`), so changing it means
  * changing the env var (or fallback) and rebuilding.
  *
- * When the custom domain is purchased:
+ * If the canonical domain ever changes:
  *   1. Update NEXT_PUBLIC_SITE_URL in Vercel → Project → Settings →
- *      Environment Variables.
+ *      Environment Variables (Production + Preview).
  *   2. Update the fallback below to match.
  *   3. Push — done. No other file references the URL.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://vasukasipuri.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://heyvasu.com"
 ).replace(/\/$/, "");

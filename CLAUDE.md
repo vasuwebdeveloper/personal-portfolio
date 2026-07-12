@@ -23,7 +23,7 @@ There is no test suite and no lint script. `npm run build` is the verification g
 
 ## Deployment
 
-Vercel (free Hobby tier) via Git integration: push to `main` = production deploy at https://vasukasipuri.vercel.app; any other branch = preview URL. Never deploy manually with `vercel deploy`. The public URL has exactly one source of truth — `NEXT_PUBLIC_SITE_URL` env var with the fallback constant in `lib/site.ts`; metadataBase, canonicals, OG URLs, sitemap, and robots all derive from it. Never hardcode the site URL anywhere else. Security headers live in `vercel.json` (with `output: "export"`, headers in `next.config.ts` do not work).
+Vercel (free Hobby tier) via Git integration, team `AI_Portfolio` → project `vasukasipuri`: push to `main` = production deploy at https://heyvasu.com (domain registered at Spaceship; `www` 308-redirects to the apex); any other branch = preview URL. Never deploy manually with `vercel deploy`. The public URL has exactly one source of truth — `NEXT_PUBLIC_SITE_URL` env var with the fallback constant in `lib/site.ts`; metadataBase, canonicals, OG URLs, sitemap, and robots all derive from it. Never hardcode the site URL anywhere else. Security headers live in `vercel.json` (with `output: "export"`, headers in `next.config.ts` do not work).
 
 ## Architecture
 

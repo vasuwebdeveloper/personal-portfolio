@@ -38,9 +38,10 @@ npm run generate:banner -- <slug> "<title>" "<TAG · TAG>"  # blog banner + OG c
 Hosted on Vercel (free Hobby tier) with Git integration — there is no manual
 deploy step:
 
-- **Push to `main`** → production deploy at https://vasukasipuri.vercel.app
+- **Push to `main`** → production deploy at https://heyvasu.com
 - **Push to any other branch** → a unique preview URL per commit
-- Deploys, logs, and settings: https://vercel.com → project `vasukasipuri`
+- Deploys, logs, and settings: https://vercel.com → team `AI_Portfolio` →
+  project `vasukasipuri`
   (repo: https://github.com/vasuwebdeveloper/personal-portfolio)
 
 The site URL lives in exactly ONE place: the `NEXT_PUBLIC_SITE_URL` env var,
@@ -48,24 +49,36 @@ with a fallback constant in `lib/site.ts`. Everything absolute — metadataBase,
 canonical URLs, Open Graph URLs, `sitemap.xml`, `robots.txt` — derives from it
 at build time.
 
-### Attaching the custom domain later
+### Custom domain — heyvasu.com
 
-1. Buy the domain (e.g. `vasukasipuri.com`) at any registrar.
-2. Vercel dashboard → project `vasukasipuri` → **Settings → Domains** → add
-   the domain (add both `vasukasipuri.com` and `www.vasukasipuri.com`; set the
-   apex as **primary**).
-3. At the registrar, create the DNS records exactly as the Domains screen
-   instructs (an `A` record for the apex, `CNAME` for `www`), then wait for
-   Vercel to show the domain as verified.
-4. Update `NEXT_PUBLIC_SITE_URL` to `https://vasukasipuri.com` in Vercel →
-   **Settings → Environment Variables** (Production + Preview), and update the
-   fallback in `lib/site.ts` to match.
-5. Push (or redeploy) — sitemap, robots, canonicals, and OG URLs all switch to
-   the new domain in one build.
-6. Verify `https://vasukasipuri.vercel.app` now 308-redirects to the primary
-   domain (Vercel does this automatically once a primary domain is set).
-7. Add the domain to Google Search Console and submit
-   `https://vasukasipuri.com/sitemap.xml`.
+The domain `heyvasu.com` (registered at Spaceship) is attached to the Vercel
+project: apex is the primary production domain, `www.heyvasu.com` 308-redirects
+to it, and `NEXT_PUBLIC_SITE_URL` (+ the fallback in `lib/site.ts`) is
+`https://heyvasu.com`.
+
+**The one manual dependency is DNS at Spaceship.** If the domain ever shows
+"Invalid Configuration" in Vercel → Settings → Domains, set these records in
+Spaceship → Domain → **DNS/Nameservers → Advanced DNS**:
+
+| Type  | Host  | Value                              |
+| ----- | ----- | ---------------------------------- |
+| A     | `@`   | `216.198.79.1`                     |
+| A     | `@`   | `64.29.17.1`                       |
+| CNAME | `www` | `92f4fe9e11d6dedf.vercel-dns-017.com` |
+
+…and delete any Spaceship parking/ALIAS records on `@` and `www` first.
+(Records current as of July 2026 — if Vercel's Domains screen shows different
+values, trust the dashboard.)
+
+After DNS propagates, verify:
+
+1. `https://heyvasu.com` loads over HTTPS.
+2. `https://www.heyvasu.com` 308-redirects to the apex.
+3. `curl -s https://heyvasu.com/sitemap.xml` lists heyvasu.com URLs.
+4. Add the domain to Google Search Console (DNS TXT verification or the
+   HTML-file method) and submit `https://heyvasu.com/sitemap.xml`.
+5. Validate the Open Graph card with LinkedIn's Post Inspector:
+   https://www.linkedin.com/post-inspector/
 
 ## Architecture
 
