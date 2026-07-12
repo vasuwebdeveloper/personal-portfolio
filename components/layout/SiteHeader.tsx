@@ -15,7 +15,22 @@ export default async function SiteHeader({ profile }: { profile: SiteProfile }) 
 
   return (
     <header className="border-b border-rule">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 py-4 sm:px-8">
+      {/* System-status microbar — additive telemetry row above the masthead. */}
+      <div
+        className="mx-auto flex max-w-6xl items-center justify-end gap-2 px-5 pt-2.5 sm:px-8"
+        aria-label={`System status: ${flagship.code} online, ${flagship.agents.length} agents, MCP linked`}
+      >
+        <span className="status-dot" aria-hidden="true" />
+        <span className="font-mono text-[0.625rem] font-medium tracking-[0.16em] uppercase text-ink-muted">
+          {flagship.code}
+          <span className="hidden sm:inline"> online</span>
+          <span className="hidden lg:inline">
+            {" "}
+            · {flagship.agents.length} agents · MCP linked
+          </span>
+        </span>
+      </div>
+      <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 pb-4 pt-1 sm:px-8">
         <Link href="/" className="group flex flex-col leading-tight">
           <span className="font-mono text-sm font-semibold tracking-[0.14em] uppercase">
             {profile.name}
@@ -24,20 +39,6 @@ export default async function SiteHeader({ profile }: { profile: SiteProfile }) 
             {profile.role}
           </span>
         </Link>
-        <span
-          className="inline-flex items-center gap-2"
-          aria-label={`System status: ${flagship.code} online, ${flagship.agents.length} agents, MCP linked`}
-        >
-          <span className="status-dot" aria-hidden="true" />
-          <span className="font-mono text-[0.625rem] font-medium tracking-[0.16em] uppercase text-ink-muted">
-            {flagship.code}
-            <span className="hidden sm:inline"> online</span>
-            <span className="hidden lg:inline">
-              {" "}
-              · {flagship.agents.length} agents · MCP linked
-            </span>
-          </span>
-        </span>
         <nav aria-label="Primary">
           <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
             {NAV_ITEMS.map((item) => (
