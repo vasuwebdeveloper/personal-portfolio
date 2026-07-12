@@ -51,9 +51,9 @@ const ANSWER_MS_PER_TOKEN = 110;
 
 /** Illustrative demo output per query — plausible, never real client data. */
 const DEMO_ANSWERS: Record<string, string> = {
-  q_aging: "14 invoices · ₹8.2L · 3 flagged",
-  q_bills: "9 bills open · ₹5.6L due",
-  q_deferred: "₹42.3L deferred · 6 rows",
+  q_aging: "14 invoices · $86K · 3 flagged",
+  q_bills: "9 bills open · $54K due",
+  q_deferred: "$412K deferred · 6 rows",
   q_pos: "5 POs waiting · oldest 11 days",
   q_quarter: "AR ↓12% · AP flat · brief ready",
 };
