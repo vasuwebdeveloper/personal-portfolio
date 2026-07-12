@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Besley, IBM_Plex_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
@@ -74,6 +75,7 @@ export default async function RootLayout({
         <main id="main">{children}</main>
         <SiteFooter profile={profile} />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
