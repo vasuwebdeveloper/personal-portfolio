@@ -3,7 +3,7 @@ import type { Post } from "@/content/types";
 import { formatDate, postDate } from "@/lib/blog";
 
 /**
- * The static index rows — the page's real content, rendered at build time.
+ * The static index rows: the page's real content, rendered at build time.
  * BlogExplorer swaps these for client-filtered rows only while a search
  * query or tag filter is active.
  */

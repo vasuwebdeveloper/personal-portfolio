@@ -1,14 +1,14 @@
 import type { Post } from "@/content/types";
 
 /**
- * Blog presentation helpers — pure functions over content-layer rows.
+ * Blog presentation helpers: pure functions over content-layer rows.
  * No imports from /content: everything arrives as arguments, so these stay
  * valid unchanged when the data moves to a database.
  */
 
 export const POSTS_PER_PAGE = 10;
 
-/** Anchor ids for headings — must match between the ToC and the rendered
+/** Anchor ids for headings must match between the ToC and the rendered
  * heading, so both sides use this one function. */
 export function slugifyHeading(text: string): string {
   return text
@@ -24,7 +24,7 @@ export interface TocEntry {
   text: string;
 }
 
-/** H2s only — the ToC mirrors the essay's top-level structure, not every
+/** H2s only: the ToC mirrors the essay's top-level structure, not every
  * ledger-label subhead. */
 export function extractH2s(markdown: string): TocEntry[] {
   return [...markdown.matchAll(/^## +(.+?)\s*$/gm)].map((match) => {
@@ -53,7 +53,7 @@ export interface PageSlice {
   posts: Post[];
   page: number;
   totalPages: number;
-  /** 1-based entry numbers for the ledger line ("entries 11–20"). */
+  /** 1-based entry numbers for the ledger line ("entries 11-20"). */
   firstEntry: number;
   lastEntry: number;
   total: number;

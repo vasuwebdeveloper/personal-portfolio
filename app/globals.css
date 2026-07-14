@@ -204,7 +204,7 @@ body {
   animation: signal-travel 650ms linear forwards;
 }
 
-/* Routing signals fire in sequence — each active agent's group carries a
+/* Routing signals fire in sequence; each active agent's group carries a
  * --stagger custom property set inline by the component. */
 .schematic[data-phase="route"] .is-active .sig-route {
   animation: signal-travel 650ms linear forwards;

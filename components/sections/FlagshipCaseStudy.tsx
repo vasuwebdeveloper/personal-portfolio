@@ -59,7 +59,7 @@ export default function FlagshipCaseStudy({
             </div>
           </div>
 
-          {/* Agent roster — structured like the table it will one day be */}
+          {/* Agent roster: structured like the table it will one day be */}
           <div className="mt-12 overflow-x-auto">
             <table className="w-full min-w-[560px] border-collapse text-left">
               <caption className="meta-label mb-3 text-left">

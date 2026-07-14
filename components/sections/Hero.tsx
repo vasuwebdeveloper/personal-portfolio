@@ -52,7 +52,7 @@ export default function Hero({
                 href="/#flagship"
                 className="border border-stamp-deep px-5 py-2.5 font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-stamp-deep transition-colors hover:bg-stamp-deep hover:text-paper"
               >
-                {caseStudy.code} — the flagship system
+                {caseStudy.code} · the flagship system
               </Link>
               {profile.resumePath ? (
                 <a

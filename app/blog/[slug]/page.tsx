@@ -20,7 +20,7 @@ import {
 
 /**
  * Statically generated from the content layer. When the site moves to a
- * database, these params come from Prisma instead — the route code is
+ * database, these params come from Prisma instead; the route code is
  * already runtime-agnostic.
  */
 export const dynamicParams = false;
@@ -105,7 +105,7 @@ export default async function BlogPostPage({
     <div className="mx-auto max-w-5xl px-5 pt-12 sm:px-8 sm:pt-16">
       <script
         type="application/ld+json"
-        // Static JSON derived from the content layer — no user input.
+        // Static JSON derived from the content layer; no user input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
@@ -117,7 +117,7 @@ export default async function BlogPostPage({
         }
       >
         <article className="max-w-[70ch]">
-          {/* Banner plate — also the post's Open Graph card. Decorative here:
+          {/* Banner plate, also the post's Open Graph card. Decorative here:
               the title it carries is the h1 right below. */}
           {post.banner ? (
             <figure className="mb-10 border border-rule">
@@ -148,7 +148,7 @@ export default async function BlogPostPage({
             {post.summary}
           </p>
 
-          {/* Document control block — the entry's own totals row. */}
+          {/* Document control block: the entry's own totals row. */}
           <div className="rule-total mt-7 flex flex-wrap items-baseline gap-x-6 gap-y-2 py-3">
             <span className="meta-label">
               {post.status === "draft" ? "Drafted" : "Posted"}{" "}
@@ -178,7 +178,7 @@ export default async function BlogPostPage({
             </span>
           </div>
 
-          {/* Contents — inline on small screens, aside on large. */}
+          {/* Contents: inline on small screens, aside on large. */}
           {showToc ? (
             <div className="mt-8 border-b border-rule pb-8 lg:hidden">
               <Toc entries={headings} />
@@ -193,7 +193,7 @@ export default async function BlogPostPage({
             {post.tags.join(" · ")}
           </p>
 
-          {/* Filed by — compact author card */}
+          {/* Filed by: compact author card */}
           <div className="mt-10 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border border-rule px-5 py-4">
             <div className="max-w-[52ch]">
               <p className="meta-label">Filed by</p>
@@ -216,7 +216,7 @@ export default async function BlogPostPage({
             ) : null}
           </div>
 
-          {/* Related entries — shared tags only; absent when nothing shares. */}
+          {/* Related entries: shared tags only; absent when nothing shares. */}
           {related.length > 0 ? (
             <div className="mt-12">
               <p className="meta-label text-stamp-deep">Related entries</p>

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 /**
  * Share controls: two plain intent links and a clipboard write. No SDKs,
- * no embeds, no trackers — the LinkedIn/X anchors are ordinary hrefs.
+ * no embeds, no trackers; the LinkedIn/X anchors are ordinary hrefs.
  */
 export default function ShareRow({
   url,
@@ -23,7 +23,7 @@ export default function ShareRow({
       window.clearTimeout(resetTimer.current);
       resetTimer.current = window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard unavailable — nothing to show.
+      // Clipboard unavailable; nothing to show.
     }
   }
 

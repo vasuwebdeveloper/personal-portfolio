@@ -4,7 +4,7 @@
  * Every interface here is deliberately shaped like a future database table
  * (stable `id`, `slug`, timestamps, `sortOrder`) so the static data files in
  * /content can later be replaced by Prisma models without touching any
- * component. Components never import these data files directly — they go
+ * component. Components never import these data files directly; they go
  * through lib/content.ts, which is the single seam for that migration.
  */
 
@@ -17,7 +17,7 @@ export interface Post {
   /**
    * Markdown body. Supports headings (## / ###), lists, links, blockquotes,
    * inline `code`, fenced code blocks, tables (GFM), bold/italics, and `---`
-   * rules — all styled to the design system by components/blog/PostBody.tsx.
+   * rules, all styled to the design system by components/blog/PostBody.tsx.
    */
   body: string;
   tags: string[];
@@ -110,7 +110,7 @@ export interface SocialLink {
   href: string;
 }
 
-/** Singleton profile — a future `site_profile` table with one row. */
+/** Singleton profile: a future `site_profile` table with one row. */
 export interface SiteProfile {
   name: string;
   role: string;

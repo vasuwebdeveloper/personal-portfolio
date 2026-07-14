@@ -17,7 +17,7 @@
  *
  * Geometry lives in the two layout constants below; content (agents and
  * queries) comes from the content layer via props. The answer strings are
- * demo choreography — deliberately illustrative, keyed by content-layer
+ * demo choreography: deliberately illustrative, keyed by content-layer
  * query id, and NOT part of the table-shaped content model.
  */
 
@@ -49,7 +49,7 @@ const NEXT_PHASE: Record<Exclude<Phase, "idle">, Phase> = {
 const TYPE_MS_PER_CHAR = 26;
 const ANSWER_MS_PER_TOKEN = 110;
 
-/** Illustrative demo output per query — plausible, never real client data. */
+/** Illustrative demo output per query: plausible, never real client data. */
 const DEMO_ANSWERS: Record<string, string> = {
   q_aging: "14 invoices · $86K · 3 flagged",
   q_bills: "9 bills open · $54K due",
@@ -159,7 +159,7 @@ export default function AgentSchematic({
     return () => clearTimeout(timer);
   }, []);
 
-  // Pause the loop while the schematic is off-viewport — no background burn.
+  // Pause the loop while the schematic is off-viewport (no background burn).
   useEffect(() => {
     const el = rootRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -222,7 +222,7 @@ export default function AgentSchematic({
     orchestrator?.name ?? "Orchestrator"
   }, which routes it across ${specialists
     .map((a) => a.name)
-    .join(", ")} — each reaching NetSuite through MCP — and returns a synthesized answer.`;
+    .join(", ")}, each reaching NetSuite through MCP, and returns a synthesized answer.`;
 
   const staggerStyle = (agentSlug: string): React.CSSProperties | undefined => {
     if (!activeSlugs.has(agentSlug)) return undefined;
@@ -436,7 +436,7 @@ export default function AgentSchematic({
             fontSize={10}
             textAnchor="middle"
           >
-            MCP · MODEL CONTEXT PROTOCOL — PYTHON
+            MCP · MODEL CONTEXT PROTOCOL · PYTHON
           </text>
 
           {/* NetSuite */}
@@ -467,7 +467,7 @@ export default function AgentSchematic({
           </text>
         </svg>
 
-        {/* Mobile layout (vertical spine — answer closes the report at the bottom) */}
+        {/* Mobile layout (vertical spine; answer closes the report at the bottom) */}
         <svg
           viewBox={M.viewBox}
           role="img"
@@ -690,7 +690,7 @@ export default function AgentSchematic({
       <figcaption className="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <span className="meta-label text-stamp-deep">Fig. 01</span>
         <span className="font-mono text-[0.6875rem] tracking-[0.06em] text-ink-muted">
-          SYS-001 routing schematic — live query delegation across subledger
+          SYS-001 routing schematic: live query delegation across subledger
           agents · illustrative demo data
         </span>
       </figcaption>

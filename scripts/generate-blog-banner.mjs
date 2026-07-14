@@ -1,5 +1,5 @@
 /**
- * Renders an on-brand blog banner (1200×630 — doubles as the post's Open
+ * Renders an on-brand blog banner (1200×630; doubles as the post's Open
  * Graph image) into public/blog/banners/<slug>.png.
  *
  * Usage:

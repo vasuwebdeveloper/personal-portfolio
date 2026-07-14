@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * ASK-000 — the deterministic concierge.
+ * ASK-000: the deterministic concierge.
  *
  * The joke is the brand: this is the site's own thesis in miniature. Visitor
  * questions are scored against a keyword index over facts the server
- * component pre-shaped from the content layer — no network calls, no model,
+ * component pre-shaped from the content layer: no network calls, no model,
  * no fuzzy matching. The route with the most keyword hits answers; zero hits
  * is an honest "no agent". The one artificial delay is a short beat
  * (RESPONSE_DELAY_MS) so answers land like a terminal, not a popup.
@@ -42,7 +42,7 @@ type Route = {
 
 const linkByLabel = (f: ConciergeFacts, label: string) =>
   f.links.find((l) => l.label.toLowerCase() === label)?.href ??
-  "not on file — email instead.";
+  "not on file. email instead.";
 
 /** Keyword index over the content layer. Highest hit count wins; ties go to
  * the earlier route. Tokens are whole words, so "do" can't hide in "London". */
@@ -63,7 +63,7 @@ const ROUTES: Route[] = [
     lines: (f) =>
       f.hasResume
         ? ["resume: Download PDF in the contact ledger above."]
-        : ["resume: being re-typeset — email for the latest copy."],
+        : ["resume: being re-typeset. email for the latest copy."],
   },
   {
     name: "contact",
@@ -119,7 +119,7 @@ const ROUTES: Route[] = [
       "multi-agent",
     ],
     lines: (f) => [
-      `${f.flagship.code} — ${f.flagship.title}`,
+      `${f.flagship.code} · ${f.flagship.title}`,
       `agents: ${f.flagship.agentNames.join(" · ")}`,
       "full write-up in the case study above.",
     ],
@@ -193,7 +193,7 @@ const ROUTES: Route[] = [
     lines: (f) => [`"${f.thesis}"`, f.guardrailLine],
   },
   {
-    // Deliberately no generic tokens ("you", "about") — they hijack
+    // Deliberately no generic tokens ("you", "about") because they hijack
     // questions whose real subject lives in another route.
     name: "about",
     keywords: ["who", "vasu", "kasipuri", "yourself", "background", "bio", "role"],
@@ -210,7 +210,7 @@ const ROUTES: Route[] = [
     name: "greeting",
     keywords: ["hello", "hi", "hey", "namaste", "yo"],
     lines: () => [
-      "hello — deterministic concierge here. try 'flagship', 'writing', or 'github'.",
+      "hello. deterministic concierge here. try 'flagship', 'writing', or 'github'.",
     ],
   },
 ];
@@ -236,7 +236,7 @@ function routeQuery(
     return {
       route: "no agent",
       lines: [
-        "that routes to no agent — try 'flagship', 'writing', 'github', or 'help'.",
+        "that routes to no agent. try 'flagship', 'writing', 'github', or 'help'.",
       ],
     };
   }
@@ -276,7 +276,7 @@ export default function AskConcierge({ facts }: { facts: ConciergeFacts }) {
         <span className="meta-label text-stamp-deep">
           ASK-000 · deterministic concierge
         </span>
-        <span className="meta-label">this is the 80% — no LLM involved</span>
+        <span className="meta-label">this is the 80%: no LLM involved</span>
       </div>
       <div
         ref={logRef}
@@ -285,7 +285,7 @@ export default function AskConcierge({ facts }: { facts: ConciergeFacts }) {
         className="h-52 overflow-y-auto px-4 py-3 font-mono text-[0.8125rem] leading-relaxed"
       >
         <p className="text-ink-muted">
-          ASK-000 ready — pure keyword routing over the site&apos;s content
+          ASK-000 ready: pure keyword routing over the site&apos;s content
           layer. Try &ldquo;flagship&rdquo;, &ldquo;writing&rdquo;,
           &ldquo;github&rdquo;, or &ldquo;help&rdquo;.
         </p>
@@ -320,7 +320,7 @@ export default function AskConcierge({ facts }: { facts: ConciergeFacts }) {
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="ask the concierge — e.g. what certifications?"
+          placeholder="ask the concierge, e.g. what certifications?"
           autoComplete="off"
           spellCheck={false}
           className="w-full bg-transparent font-mono text-[0.8125rem] text-ink placeholder:text-ink-muted/60 focus:outline-none"

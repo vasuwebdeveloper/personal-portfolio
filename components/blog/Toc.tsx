@@ -1,7 +1,7 @@
 import type { TocEntry } from "@/lib/blog";
 
 /**
- * Table of contents — the essay's H2 spine as a ledger contents column.
+ * Table of contents: the essay's H2 spine as a ledger contents column.
  * Rendered only when the post has 3+ H2s; the page decides placement
  * (inline on mobile, sticky aside on wide screens).
  */

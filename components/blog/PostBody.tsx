@@ -10,7 +10,7 @@ import { highlightCode } from "@/lib/highlight";
  *
  * Async server component: fenced code blocks are highlighted with Shiki
  * before render (react-markdown itself is synchronous), headings get anchor
- * ids that match the table of contents, and none of this ships JavaScript —
+ * ids that match the table of contents, and none of this ships JavaScript;
  * the one client island is the copy button inside CodeBlock.
  */
 
@@ -125,7 +125,7 @@ export default async function PostBody({ markdown }: { markdown: string }) {
           if (entry) {
             return <CodeBlock html={entry.html} code={code} lang={entry.lang} />;
           }
-          // Fence the highlighter didn't see (shouldn't happen) — plain style.
+          // Fence the highlighter didn't see (shouldn't happen): plain style.
           return (
             <pre className="mt-6 overflow-x-auto border border-rule bg-band/60 p-4 font-mono text-[0.8125rem] leading-relaxed [&_code]:bg-transparent [&_code]:p-0">
               {children}

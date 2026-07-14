@@ -3,7 +3,7 @@ import type { SiteProfile } from "@/content/types";
 
 /**
  * Masthead as a printed report's form header: the identity block set in the
- * display serif, then the primary nav as the report's column-header strip —
+ * display serif, then the primary nav as the report's column-header strip:
  * a band-tinted row where each destination carries the GL account code its
  * section already uses (SectionHeading), so the navigation is literally the
  * site's chart of accounts.

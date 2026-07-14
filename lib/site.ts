@@ -1,5 +1,5 @@
 /**
- * Deployment config — the single source of truth for the site's public URL.
+ * Deployment config: the single source of truth for the site's public URL.
  *
  * Everything that emits an absolute URL (metadataBase → canonical + Open
  * Graph URLs, sitemap.xml, robots.txt) reads from here via the site profile.
@@ -10,7 +10,7 @@
  *   1. Update NEXT_PUBLIC_SITE_URL in Vercel → Project → Settings →
  *      Environment Variables (Production + Preview).
  *   2. Update the fallback below to match.
- *   3. Push — done. No other file references the URL.
+ *   3. Push; done. No other file references the URL.
  */
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://heyvasu.com"

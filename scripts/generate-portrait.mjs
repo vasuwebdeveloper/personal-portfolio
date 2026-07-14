@@ -1,6 +1,6 @@
 /**
- * Renders public/portrait.webp — the About section's "personnel record"
- * plate — from a source photo, mapped onto the site's ink/paper duotone.
+ * Renders public/portrait.webp (the About section's "personnel record"
+ * plate) from a source photo, mapped onto the site's ink/paper duotone.
  *
  * Usage: npm run generate:portrait -- <path-to-source-photo>
  *

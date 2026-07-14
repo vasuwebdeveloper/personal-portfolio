@@ -2,7 +2,7 @@
   "name": "vasu-kasipuri-portfolio",
   "version": "0.1.0",
   "private": true,
-  "description": "Portfolio of Vasu Kasipuri — NetSuite Architect building production-grade agentic AI for enterprise finance.",
+  "description": "Portfolio of Vasu Kasipuri, NetSuite Architect building production-grade agentic AI for enterprise finance.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
