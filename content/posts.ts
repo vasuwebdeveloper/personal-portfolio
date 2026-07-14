@@ -22,11 +22,11 @@ export const posts: Post[] = [
     title: "RAG internals: what the embeddings layer is actually doing",
     summary:
       "Past the vector-database marketing: how text becomes geometry, why chunking strategy decides retrieval quality, and where similarity search quietly fails.",
-    body: `Most RAG explainers stop at "embed your documents, search by similarity." The interesting engineering lives one layer down — what the embedding model preserves and discards, why chunk boundaries decide what can ever be retrieved, and the failure modes that only show up when your corpus is financial data instead of a demo wiki.
+    body: `Most RAG explainers stop at "embed your documents, search by similarity." The interesting engineering lives one layer down: what the embedding model preserves and discards, why chunk boundaries decide what can ever be retrieved, and the failure modes that only show up when your corpus is financial data instead of a demo wiki.
 
 ### What this essay will cover
 
-- How text becomes geometry — and what an embedding model quietly throws away
+- How text becomes geometry, and what an embedding model quietly throws away
 - Chunking as an architecture decision, not a preprocessing step
 - Where cosine similarity fails on numbers, dates, and ledger language
 - Evaluating retrieval the way you would reconcile a subledger
@@ -49,8 +49,8 @@ export const posts: Post[] = [
     slug: "real-cost-of-llms-in-production",
     title: "The real cost of an LLM in production: a working ledger",
     summary:
-      "Token pricing is the smallest line item. A cost model for agentic workloads — context windows, retries, caching, evaluation — built the way finance would build it.",
-    body: `Everyone prices the happy path: tokens in, tokens out. Production agentic systems spend differently — context that grows with every hop, retries on malformed tool calls, evaluation runs, and the caching decisions that make or break the unit economics.
+      "Token pricing is the smallest line item. A cost model for agentic workloads (context windows, retries, caching, evaluation) built the way finance would build it.",
+    body: `Everyone prices the happy path: tokens in, tokens out. Production agentic systems spend differently: context that grows with every hop, retries on malformed tool calls, evaluation runs, and the caching decisions that make or break the unit economics.
 
 ### What this essay will cover
 
@@ -77,12 +77,12 @@ export const posts: Post[] = [
     title: "Wiring AI agents into NetSuite over MCP",
     summary:
       "What it takes to put a natural-language interface on an ERP without handing a language model the keys: tool contracts, scoped agents, and an orchestrator that knows when not to use AI.",
-    body: `The Model Context Protocol makes "connect an LLM to your ERP" sound like an afternoon project. The part that takes real architecture is everything around the connection: designing tool contracts an agent can't misuse, scoping each agent to one financial domain, and building an orchestrator that treats the LLM as a routing and synthesis layer — not a database client.
+    body: `The Model Context Protocol makes "connect an LLM to your ERP" sound like an afternoon project. The part that takes real architecture is everything around the connection: designing tool contracts an agent can't misuse, scoping each agent to one financial domain, and building an orchestrator that treats the LLM as a routing and synthesis layer, not a database client.
 
 ### What this essay will cover
 
 - Tool contracts as the guardrail: typed, scoped, enumerable
-- One agent per subledger — why domain boundaries beat one mega-agent
+- One agent per subledger: why domain boundaries beat one mega-agent
 - The orchestrator's real job: knowing when *not* to use the LLM
 
 *This essay is in draft. The full write-up lands here when it's ready.*`,
@@ -100,9 +100,9 @@ export const posts: Post[] = [
   },
 ];
 
-/* ── POST TEMPLATE — copy, fill in, add to the array above ──────────────────
+/* ── POST TEMPLATE: copy, fill in, add to the array above ───────────────────
 {
-  id: "post_my_new_essay",              // unique, stable — never reuse
+  id: "post_my_new_essay",              // unique, stable, never reuse
   slug: "my-new-essay",                 // URL: /blog/my-new-essay/
   title: "My new essay title",
   summary: "One or two sentences shown on the index and in search results.",

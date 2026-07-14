@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${base}/`, changeFrequency: "monthly", priority: 1 },
     { url: `${base}/blog/`, changeFrequency: "weekly", priority: 0.8 },
-    // Index pages 2..N only — /blog/page/1/ canonicalizes to /blog/.
+    // Index pages 2..N only; /blog/page/1/ canonicalizes to /blog/.
     ...Array.from({ length: totalPages - 1 }, (_, i) => ({
       url: `${base}/blog/page/${i + 2}/`,
       changeFrequency: "weekly" as const,

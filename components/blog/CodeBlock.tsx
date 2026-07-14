@@ -25,7 +25,7 @@ export default function CodeBlock({
       window.clearTimeout(resetTimer.current);
       resetTimer.current = window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard unavailable (permissions/http) — leave the button as-is.
+      // Clipboard unavailable (permissions/http); leave the button as-is.
     }
   }
 

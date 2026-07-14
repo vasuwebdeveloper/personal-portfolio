@@ -30,9 +30,9 @@ export default async function AboutContact({
     location: profile.location,
     hasResume: Boolean(profile.resumePath),
     links: profile.links.map((l) => ({ label: l.label, href: l.href })),
-    pillars: pillars.map((p) => `${p.code} ${p.title} — ${p.thesis}`),
+    pillars: pillars.map((p) => `${p.code} ${p.title} · ${p.thesis}`),
     certifications: certifications.map(
-      (c) => `${c.title} — ${c.issuer}${c.earnedYear ? ` · ${c.earnedYear}` : ""}`,
+      (c) => `${c.title} · ${c.issuer}${c.earnedYear ? ` · ${c.earnedYear}` : ""}`,
     ),
     stack: flagship.stack,
     posts: posts.map((p) => ({ title: p.title, status: p.status })),
@@ -139,7 +139,7 @@ export default async function AboutContact({
         </div>
       </div>
 
-      {/* ASK-000 — the deterministic concierge (the joke IS the brand). */}
+      {/* ASK-000: the deterministic concierge (the joke IS the brand). */}
       <div className="mt-12">
         <AskConcierge facts={conciergeFacts} />
       </div>

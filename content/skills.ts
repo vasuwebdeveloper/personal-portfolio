@@ -29,7 +29,7 @@ export const skillPillars: SkillPillar[] = [
     code: "2200",
     title: "ERP Domain",
     thesis:
-      "The full ledger lifecycle — order to cash to close — treated as one architecture, not separate projects.",
+      "The full ledger lifecycle (order to cash to close) treated as one architecture, not separate projects.",
     items: [
       "Order to Cash (O2C)",
       "Procure to Pay (P2P)",
@@ -62,7 +62,7 @@ export const skillPillars: SkillPillar[] = [
     code: "2400",
     title: "Engineering",
     thesis:
-      "Enough depth to build what I design — and to know what shouldn't be built.",
+      "Enough depth to build what I design, and to know what shouldn't be built.",
     items: [
       "SuiteScript 1.0 / 2.x",
       "TypeScript",
@@ -94,7 +94,7 @@ export const skillPillars: SkillPillar[] = [
     code: "2600",
     title: "AI & ML",
     thesis:
-      "Agentic systems with guardrails first — the 20% that actually needs an LLM.",
+      "Agentic systems with guardrails first: the 20% that actually needs an LLM.",
     items: [
       "Agentic systems",
       "Model Context Protocol (MCP)",

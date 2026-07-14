@@ -46,11 +46,11 @@ ${post.tags.map((tag) => `      <category>${esc(tag)}</category>`).join("\n")}
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${esc(`Writing — ${profile.name}`)}</title>
+    <title>${esc(`Writing · ${profile.name}`)}</title>
     <link>${base}/blog/</link>
     <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml"/>
     <description>${esc(
-      "Essays on agentic AI for enterprise finance — RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+      "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
     )}</description>
     <language>en</language>
 ${newest ? `    <lastBuildDate>${new Date(newest).toUTCString()}</lastBuildDate>` : ""}

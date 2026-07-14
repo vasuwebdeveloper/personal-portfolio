@@ -28,13 +28,13 @@ const plexMono = IBM_Plex_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getSiteProfile();
-  const title = `${profile.name} — NetSuite Architect`;
+  const title = `${profile.name} · NetSuite Architect`;
 
   return {
     metadataBase: new URL(profile.siteUrl),
     title: {
       default: title,
-      template: `%s — ${profile.name}`,
+      template: `%s · ${profile.name}`,
     },
     description: profile.description,
     openGraph: {
@@ -65,12 +65,12 @@ export default async function RootLayout({
       className={`${besley.variable} ${publicSans.variable} ${plexMono.variable}`}
     >
       <body className="min-h-screen antialiased">
-        {/* Hoisted to <head> by React — page-level `alternates` metadata
+        {/* Hoisted to <head> by React; page-level `alternates` metadata
             would silently replace this if it lived in generateMetadata. */}
         <link
           rel="alternate"
           type="application/rss+xml"
-          title={`Writing — ${profile.name}`}
+          title={`Writing · ${profile.name}`}
           href="/feed.xml"
         />
         <a

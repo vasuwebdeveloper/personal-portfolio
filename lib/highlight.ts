@@ -10,7 +10,7 @@ import {
  * The theme is the Green-Bar palette applied to code: ink for prose-weight
  * tokens, stamp-deep for keywords (the AI/emphasis layer), annotation blue
  * for strings, muted ink for comments. Hex values mirror the tokens in
- * app/globals.css — if those change, update these to match (same doctrine
+ * app/globals.css; if those change, update these to match (same doctrine
  * as the asset scripts in /scripts).
  *
  * Runs only inside server components at build time; no highlighting
@@ -21,7 +21,7 @@ const INK = "#17231d";
 const INK_MUTED = "#54655a";
 const STAMP_DEEP = "#9c3110";
 const ANNOTATE = "#2242a8";
-/** --color-band at 60% over paper — matches the pre-existing code-block wash. */
+/** --color-band at 60% over paper; matches the pre-existing code-block wash. */
 const CODE_BG = "#eff3ea";
 
 const greenBarTheme: ThemeRegistration = {

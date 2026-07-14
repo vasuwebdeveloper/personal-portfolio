@@ -9,7 +9,7 @@ import { paginatePosts, POSTS_PER_PAGE } from "@/lib/blog";
 import { getPosts } from "@/lib/content";
 
 /**
- * Index pages 2..N — /blog/ is page 1. `output: export` requires at least
+ * Index pages 2..N; /blog/ is page 1. `output: export` requires at least
  * one generated param, so while everything fits on one page this route
  * emits /blog/page/1/ as a twin of /blog/ whose canonical points there;
  * from two pages onward it emits 2..N as designed.
@@ -34,8 +34,8 @@ export async function generateMetadata({
   return {
     title: `Writing · page ${n}`,
     description:
-      "Essays on agentic AI for enterprise finance — RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
-    // Page 1 is an alias of /blog/ — canonicalize it there.
+      "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+    // Page 1 is an alias of /blog/, so canonicalize it there.
     alternates: { canonical: n === "1" ? "/blog/" : `/blog/page/${n}/` },
   };
 }

@@ -34,7 +34,7 @@ export default function Certifications({
                 Year
               </th>
               {/* `relative` keeps the absolutely-positioned sr-only text inside
-                  the scroll container — without it the span escapes clipping
+                  the scroll container; without it the span escapes clipping
                   and stretches the page horizontally on small screens. */}
               <th scope="col" className="meta-label py-2.5 w-28 relative">
                 <span className="sr-only">Featured</span>
@@ -57,7 +57,7 @@ export default function Certifications({
                   {cert.issuer}
                 </td>
                 <td className="py-3 pr-4 font-mono text-[0.8125rem]">
-                  {cert.earnedYear ?? "—"}
+                  {cert.earnedYear ?? "-"}
                 </td>
                 <td className="py-3">
                   {cert.featured ? (

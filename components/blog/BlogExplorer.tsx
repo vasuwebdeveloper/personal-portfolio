@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 
 /**
- * Search + tag filtering for the writing index — progressive enhancement
+ * Search + tag filtering for the writing index: progressive enhancement
  * over the statically rendered rows (passed in as children).
  *
  * The index JSON is generated at build time from the content layer and
  * fetched once, on the first interaction with the box or a chip. Matching
  * is plain case-insensitive substring across title, description, and tags:
  * at tens of posts, exact matching is predictable and debuggable in a way
- * fuzzy scoring is not — Fuse.js earns its bytes only when typo tolerance
+ * fuzzy scoring is not; Fuse.js earns its bytes only when typo tolerance
  * across hundreds of entries starts to matter.
  */
 
@@ -96,7 +96,7 @@ export default function BlogExplorer({
               ensureIndex();
               setQuery(e.target.value);
             }}
-            placeholder="locate entries — title, summary, or tag"
+            placeholder="locate entries: title, summary, or tag"
             autoComplete="off"
             spellCheck={false}
             className="w-full bg-transparent font-mono text-[0.8125rem] text-ink placeholder:text-ink-muted/60 focus:outline-none"
@@ -181,7 +181,7 @@ export default function BlogExplorer({
               </div>
             ) : (
               <p className="mt-4 border-t border-rule py-7 font-mono text-[0.8125rem] text-ink-muted">
-                No entries match — clear the filters or try a tag like{" "}
+                No entries match. Clear the filters or try a tag like{" "}
                 {tags.slice(0, 2).join(" or ")}.
               </p>
             )}

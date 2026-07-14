@@ -1,14 +1,12 @@
 import type { Certification } from "./types";
 
-// [TODO: Vasu — add any remaining certifications worth showing, and fill in
-// earned years for the NetSuite credentials if you want them displayed.]
 export const certifications: Certification[] = [
   {
     id: "cert_ns_appdev",
     slug: "netsuite-application-developer",
     title: "NetSuite Certified Application Developer",
     issuer: "Oracle NetSuite",
-    earnedYear: null,
+    earnedYear: 2023,
     featured: true,
     sortOrder: 1,
   },
@@ -17,36 +15,45 @@ export const certifications: Certification[] = [
     slug: "netsuite-web-services-developer",
     title: "NetSuite Certified Web Services Developer",
     issuer: "Oracle NetSuite",
-    earnedYear: null,
+    earnedYear: 2023,
     featured: true,
     sortOrder: 2,
+  },
+  {
+    id: "cert_ns_suitecloud",
+    slug: "netsuite-suitecloud-developer",
+    title: "NetSuite Certified SuiteCloud Developer",
+    issuer: "Oracle NetSuite",
+    earnedYear: 2023,
+    featured: true,
+    sortOrder: 3,
   },
   {
     id: "cert_ns_suitecommerce",
     slug: "netsuite-suitecommerce-developer",
     title: "NetSuite Certified SuiteCommerce Developer",
     issuer: "Oracle NetSuite",
-    earnedYear: null,
+    earnedYear: 2018,
     featured: true,
-    sortOrder: 3,
+    sortOrder: 4,
   },
   {
     id: "cert_ns_foundation",
     slug: "netsuite-suitefoundation",
     title: "NetSuite Certified SuiteFoundation",
     issuer: "Oracle NetSuite",
-    earnedYear: null,
+    earnedYear: 2022,
     featured: true,
-    sortOrder: 4,
+    sortOrder: 5,
   },
   {
     id: "cert_ns_ai",
     slug: "netsuite-ai-foundations-associate",
     title: "NetSuite Certified AI Foundations Associate",
     issuer: "Oracle NetSuite",
-    earnedYear: null,
+    earnedYear: 2025,
     featured: true,
-    sortOrder: 5,
+    sortOrder: 6,
   },
   {
     id: "cert_anthropic_claude101",
@@ -55,7 +62,7 @@ export const certifications: Certification[] = [
     issuer: "Anthropic",
     earnedYear: 2026,
     featured: true,
-    sortOrder: 6,
+    sortOrder: 7,
   },
   {
     id: "cert_anthropic_claudecode101",
@@ -64,6 +71,6 @@ export const certifications: Certification[] = [
     issuer: "Anthropic",
     earnedYear: 2026,
     featured: true,
-    sortOrder: 7,
+    sortOrder: 8,
   },
 ];

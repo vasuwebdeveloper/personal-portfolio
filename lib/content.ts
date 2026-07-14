@@ -1,5 +1,5 @@
 /**
- * Content accessor — the ONLY module allowed to import from /content.
+ * Content accessor: the ONLY module allowed to import from /content.
  *
  * Components call these functions and never touch the data files, so moving
  * to a database later means swapping the internals here for Prisma queries
@@ -25,7 +25,7 @@ export async function getSiteProfile(): Promise<SiteProfile> {
   return {
     ...siteProfile,
     // Hide resume links (hero, contact, footer) until the PDF actually
-    // exists in /public — no dead downloads. Runs at build time only.
+    // exists in /public (no dead downloads). Runs at build time only.
     resumePath:
       siteProfile.resumePath && resumeExists(siteProfile.resumePath)
         ? siteProfile.resumePath
@@ -54,7 +54,7 @@ export async function getCertifications(): Promise<Certification[]> {
   return [...certifications].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-/** All posts, newest first. Drafts included — the UI decides how to render them. */
+/** All posts, newest first. Drafts included; the UI decides how to render them. */
 export async function getPosts(): Promise<Post[]> {
   return [...posts].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
@@ -63,7 +63,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   return posts.find((post) => post.slug === slug) ?? null;
 }
 
-/** Derived, not stored — stays valid when posts move to a database. */
+/** Derived, not stored; stays valid when posts move to a database. */
 export function estimateReadingMinutes(post: Post): number {
   const words = post.body.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 220));

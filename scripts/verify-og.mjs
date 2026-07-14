@@ -2,7 +2,7 @@
  * Post-build gate: every blog post in the export must carry its OWN
  * Open Graph image, and the file it points at must exist in out/.
  *
- * This is what LinkedIn renders when a post is shared — a post that falls
+ * This is what LinkedIn renders when a post is shared: a post that falls
  * back to the site-wide /og.png (or to a dead path) fails the build with
  * instructions instead of shipping a broken card. Also confirms feed.xml
  * and the search index made it into the export.
@@ -17,7 +17,7 @@ const BLOG = path.join(OUT, "blog");
 const NOT_POSTS = new Set(["banners", "page"]);
 
 if (!existsSync(BLOG)) {
-  console.error("verify-og: out/blog missing — run after `next build`.");
+  console.error("verify-og: out/blog missing; run after `next build`.");
   process.exit(1);
 }
 
@@ -79,5 +79,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `verify-og: OK — ${postDirs.length} post(s) each carry their own og:image; feed.xml and search index present.`,
+  `verify-og: OK. ${postDirs.length} post(s) each carry their own og:image; feed.xml and search index present.`,
 );

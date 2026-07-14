@@ -10,7 +10,7 @@ import { getPosts, getSiteProfile } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Writing",
   description:
-    "Essays on agentic AI for enterprise finance — RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+    "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
   alternates: { canonical: "/blog/" },
 };
 
@@ -22,7 +22,7 @@ export default async function BlogIndexPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: `Writing — ${profile.name}`,
+    name: `Writing · ${profile.name}`,
     url: `${profile.siteUrl}/blog/`,
     description: metadata.description,
     author: {
@@ -43,14 +43,14 @@ export default async function BlogIndexPage() {
     <div className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
       <script
         type="application/ld+json"
-        // Static JSON derived from the content layer — no user input.
+        // Static JSON derived from the content layer; no user input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <SectionHeading code="4000" title="Writing" kicker="Index of record" />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
-        Writing is coming soon. These are the drafts on the desk — working
+        Writing is coming soon. These are the drafts on the desk: working
         notes from building agentic AI against real financial systems, posted
         here as they become essays.
       </p>
