@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Besley, IBM_Plex_Mono, Public_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SiteFooter from "@/components/layout/SiteFooter";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -88,6 +89,18 @@ export default async function RootLayout({
         <SiteFooter profile={profile} />
         <Analytics />
         <SpeedInsights />
+        {/* Umami via first-party /stats proxy; production-only so dev
+            traffic never counts. Runs alongside Vercel Analytics for
+            comparison. */}
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            defer
+            src="/stats/script.js"
+            data-website-id="85724aed-0a19-44c9-9ef8-4fc931ce7ddf"
+            data-host-url="https://heyvasu.com/stats"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

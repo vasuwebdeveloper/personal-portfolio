@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
   output: "export",
   images: { unoptimized: true },
   trailingSlash: true,
+  async rewrites() {
+    return [
+      {
+        source: "/stats/:path*",
+        destination: "https://cloud.umami.is/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
