@@ -60,3 +60,8 @@ Nothing in the codebase may assume static-only behavior; preserve that when addi
 ## Pending content TODOs
 
 Search the repo for `[TODO: Vasu`; markers sit next to the exact lines to change (flagship outcomes/metrics, production domain, real resume PDF).
+
+
+## Rules
+
+When drafting or editing blog posts in drafts/ or content/, always apply the technical-blog-writing skill.
