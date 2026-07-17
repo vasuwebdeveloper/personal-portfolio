@@ -22,9 +22,9 @@ export const posts: Post[] = [
     title: "Your first LLM API call on Groq's free tier",
     summary:
       "Make your first LLM API call in about ten minutes on Groq's free tier. Step-by-step tutorial with curl and Python, API key setup, and common error fixes.",
-    body: `Everyone talks about AI. Very few people have actually made an LLM API call from their own code. That first call is a small moment, but it changes how you see all of this. The model stops being a chat window and becomes a building block you can use anywhere.
+    body: `I made my first LLM API call from a short Python script, and it changed how I think about these models. A chat window is something you visit. A model that answers inside your own code is something you can build with.
 
-This guide walks you through your first LLM API call in about ten minutes on Groq's free tier. All you need is an email address. Python helps for the second half, but even that is optional.
+This guide walks you through your first LLM API call in about ten minutes on Groq's free tier, the same route I took. All you need is an email address. Python helps for the second half, but even that is optional.
 
 One thing to clear up before we start, because the names trip everyone up. **Groq is not Grok.** Grok is the chatbot from xAI. Groq is a company that runs open AI models on chips built for speed. Similar names, completely different things.
 
@@ -205,11 +205,11 @@ Three errors cover almost every first-day problem with a Groq API call:
 - **429 Too Many Requests** means you are sending requests faster than the free tier allows. Wait a minute and try again.
 - **Model not found** means the model name has been retired. Check the Models page and update that one line.
 
-## What you just unlocked
+## What you have now
 
 You created a key, made a raw LLM API call from the terminal, and then made a call from Python without ever exposing that key. This is the foundation under every AI feature you have used. Chatbots, summarizers, agents: all of them start with this exact request and response.
 
-From here you can play with settings like \`temperature\`, feed the model your own data, or wire it into the software you already run at work. That last one is where this blog is headed, starting with [calling an LLM from inside an ERP](/blog/ai-agents-netsuite-mcp/).
+From here you can play with settings like \`temperature\`, feed the model your own data, or wire it into the software you already run at work.
 
 If you got your first response today, that is a win. Save the script. You will build on it.`,
     tags: ["Groq", "LLM", "API"],
@@ -258,26 +258,92 @@ If you got your first response today, that is a win. Save the script. You will b
     title: "The real cost of an LLM in production: a working ledger",
     summary:
       "Token pricing is the smallest line item. A cost model for agentic workloads (context windows, retries, caching, evaluation) built the way finance would build it.",
-    body: `Everyone prices the happy path: tokens in, tokens out. Production agentic systems spend differently: context that grows with every hop, retries on malformed tool calls, evaluation runs, and the caching decisions that make or break the unit economics.
+    body: `Every provider publishes a price sheet, and every price sheet says the same thing: a few dollars per million input tokens, a few more per million output tokens. That number is clean, official, and almost useless on its own. The real cost of an LLM in production is not a rate. It is a ledger, and the rate is one line on it.
 
-### What this essay will cover
+I have spent my career building and auditing finance systems. When I need to understand a cost, I do not read the brochure. I list the line items, name the driver behind each one, and check the total against the invoice at month end. This essay builds that ledger for an LLM workload, with arithmetic you can redo on a napkin.
 
-- The line items nobody budgets: retries, evaluation, growing context
-- Why caching strategy is a finance decision wearing an engineering costume
-- A working cost model you can hold to account, line by line
+One prerequisite. If you have never seen a token bill up close, read [your first LLM API call](/blog/first-llm-api-call-groq/) first. Every API response includes a \`usage\` block that counts prompt tokens and completion tokens. Those counts are the atoms this whole essay is made of.
 
-*This essay is in draft. The full write-up lands here when it's ready.*`,
+## Token pricing is the smallest part of LLM cost
+
+A token is a chunk of text, roughly three quarters of an English word. Providers charge one rate for input tokens, which is everything you send, and a higher rate for output tokens, which is everything the model writes back. Two rates, printed on the pricing page. So far it looks like buying electricity.
+
+The trap is that the pricing page prices a single call, and production systems do not make single calls. They hold conversations, run tool loops, retry failures, and replay test suites. The rate tells you what a token costs. It says nothing about how many tokens your architecture is about to buy.
+
+That quantity is set by four drivers. All four live in your code, not in the price sheet.
+
+### Driver 1: context grows with every turn
+
+Chat APIs are stateless, which means the model remembers nothing between calls. Your code resends the entire conversation history with every new message. Turn one sends a system prompt and a question. Turn ten sends the system prompt, nine full exchanges, and the new question.
+
+Run the numbers on a modest chat. With a 1,500 token system prompt and exchanges that average 400 tokens, turn ten's input is 1,500 plus 3,600 plus the new question. That is over 5,000 tokens to ask one thing. A twenty turn conversation does not cost twenty times the first turn. It costs far more, because every turn buys back all the turns before it.
+
+### Driver 2: one request is many calls
+
+An agent is a system where the model can use tools, such as a database query or a search, before it answers. The loop looks like this: the model plans, calls a tool, reads the result, sometimes calls another tool, then writes the answer. Each step is a separate API call, and each call carries the full context of every step before it.
+
+Four to eight model calls per user request is a normal range for agent workloads. Whatever you calculated for a single call, an agent multiplies it.
+
+### Driver 3: retries are full price purchases
+
+Models return malformed JSON. Requests hit rate limits and time out. Your code retries, as it should, and the failed attempt is still billed, because the provider sold those tokens either way. A retry rate of five to ten percent is common, invisible in any demo, and it compounds with both drivers above.
+
+### Driver 4: evaluation is CI for prompts
+
+Change a prompt and you need proof that nothing else broke. That proof is an evaluation suite: a few hundred recorded cases replayed against the new prompt and scored automatically. Teams that care about quality run it on every change, the way they run tests on every commit.
+
+Those runs consume the same tokens at the same rates, in the background, where no user ever sees them. Skipping them does not save the money. It moves the cost to production incidents, which are more expensive and arrive without an invoice.
+
+## Caching is a finance decision in an engineering costume
+
+Prompt caching is the one big discount on the menu. If the beginning of your request is byte for byte identical to a recent request, the provider can reuse its work and charge a fraction of the input rate for those tokens. A tenth of the price is a common figure; check your provider's sheet for the real one.
+
+The catch is discipline. The discount only applies to a stable prefix, so the fixed parts of your prompt, meaning the system prompt and the tool definitions, must sit at the front and never churn. Put a timestamp or a session ID at the top of your system prompt and you quietly void the discount on every call.
+
+That is why I call caching a finance decision. It behaves exactly like a volume discount with terms attached, and the terms are enforced by your architecture. Somebody has to decide that the prompt layout is a contract.
+
+## The working ledger
+
+Here is the model for a concrete, made up but realistic workload: an internal assistant handling 1,000 requests a day as an agent, averaging 4 model calls per request. Each call carries about 6,000 input tokens once history and tool definitions are counted, and returns about 500.
+
+The rates below are round numbers chosen to keep the arithmetic readable, not a quote from any provider. Swap in your own price sheet; the structure is what matters. Input: $1 per million tokens. Output: $3 per million.
+
+| Line item      | Driver                                            | Tokens per month | Cost per month |
+| -------------- | ------------------------------------------------- | ---------------- | -------------- |
+| Base input     | 4,000 calls a day at 6,000 tokens                 | 720M             | $720           |
+| Base output    | 4,000 calls a day at 500 tokens                   | 60M              | $180           |
+| Retries        | 8% of calls, billed in full                       | 62M              | $72            |
+| Evaluation     | 400 cases, 25 runs a month                        | 44M              | $52            |
+| **Subtotal**   |                                                   | 886M             | **$1,024**     |
+| Prompt caching | two thirds of input is stable prefix, at 90% off  |                  | -$467          |
+| **Total**      |                                                   |                  | **$557**       |
+
+Evaluation runs cache well too; I left that credit out to keep the arithmetic short. Three things jump out of this table once you read it the way a controller would.
+
+First, the per token rate is not a decision anywhere in it. It is a constant multiplied through every line. The decisions are calls per request, context per call, retry rate, evaluation cadence, and cache discipline, and all five belong to your architecture.
+
+Second, architecture beats shopping. Halving the context per call saves about $390 a month before caching. Switching to a provider that is 20 percent cheaper saves about $205. The bigger lever is the one nobody puts on a pricing page.
+
+Third, the scariest number is not in the table. Every line scales with request volume, so growth doubles the total without changing a single assumption. A cost model that looks fine at pilot volume can become the largest line in your tooling budget a year later, with nothing having gone wrong.
+
+## Reconcile it like a subledger
+
+Finance teams close the month by reconciling subledgers against the general ledger. Do the same here. The provider's usage dashboard is your subledger, the invoice is the ledger, and your model is the budget. Once a month, make the three agree and chase every variance until it has a name.
+
+Between closes, watch one metric: tokens per request. It is the earliest warning you will get. A prompt edit that doubles the context reads as a quality improvement in the pull request. On the invoice it reads as a cost increase, and the invoice arrives weeks later. Treat drift in tokens per request the way you would treat scope creep.
+
+Keep the rates in exactly one place in your model, because they change often and usually downward. When a provider cuts prices, a clean ledger tells you within a minute what the cut is worth to you. A model you cannot reconcile to the invoice is not a model. It is a brochure with formulas in it.`,
     tags: ["LLM", "Cost", "Agentic Systems"],
-    status: "draft",
+    status: "published",
     banner: {
       src: "/blog/banners/real-cost-of-llms-in-production.png",
       alt: "The real cost of an LLM in production: a working ledger",
       width: 1200,
       height: 630,
     },
-    publishedAt: null,
+    publishedAt: "2026-07-17T00:00:00.000Z",
     createdAt: "2026-07-11T00:00:00.000Z",
-    updatedAt: "2026-07-11T00:00:00.000Z",
+    updatedAt: "2026-07-17T00:00:00.000Z",
   },
   {
     id: "post_agents_mcp",
