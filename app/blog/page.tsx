@@ -10,7 +10,7 @@ import { getPosts, getSiteProfile } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Writing",
   description:
-    "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+    "Essays on agentic AI for enterprise finance, from your first LLM API call to a production cost model you can reconcile.",
   alternates: { canonical: "/blog/" },
 };
 
@@ -50,9 +50,9 @@ export default async function BlogIndexPage() {
       <SectionHeading code="4000" title="Writing" kicker="Index of record" />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
-        Writing is coming soon. These are the drafts on the desk: working
-        notes from building agentic AI against real financial systems, posted
-        here as they become essays.
+        Working notes from building agentic AI against real financial
+        systems, written up as essays. New entries post here as the work
+        ships.
       </p>
 
       <BlogExplorer tags={allTags}>

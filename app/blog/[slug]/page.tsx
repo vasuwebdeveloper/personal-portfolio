@@ -46,6 +46,10 @@ export async function generateMetadata({
     alternates: { canonical: `/blog/${post.slug}/` },
     openGraph: {
       type: "article",
+      // Explicit og:url: LinkedIn re-canonicalizes shares to this tag, so
+      // without it a share can resolve to the site root instead of the post.
+      url: `/blog/${post.slug}/`,
+      siteName: `${profile.name} · NetSuite Architect`,
       title: post.title,
       description: post.summary,
       authors: [profile.name],

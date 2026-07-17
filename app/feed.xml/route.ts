@@ -50,7 +50,7 @@ ${post.tags.map((tag) => `      <category>${esc(tag)}</category>`).join("\n")}
     <link>${base}/blog/</link>
     <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml"/>
     <description>${esc(
-      "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+      "Essays on agentic AI for enterprise finance, from your first LLM API call to a production cost model you can reconcile.",
     )}</description>
     <language>en</language>
 ${newest ? `    <lastBuildDate>${new Date(newest).toUTCString()}</lastBuildDate>` : ""}

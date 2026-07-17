@@ -22,9 +22,9 @@ export const posts: Post[] = [
     title: "Your first LLM API call on Groq's free tier",
     summary:
       "Make your first LLM API call in about ten minutes on Groq's free tier. Step-by-step tutorial with curl and Python, API key setup, and common error fixes.",
-    body: `I made my first LLM API call from a short Python script, and it changed how I think about these models. A chat window is something you visit. A model that answers inside your own code is something you can build with.
+    body: `An LLM API call is the hello world of modern AI, and it is still the fastest way to understand what these models really are. A chat window is something you visit. A model that answers inside your own code is something you can build with.
 
-This guide walks you through your first LLM API call in about ten minutes on Groq's free tier, the same route I took. All you need is an email address. Python helps for the second half, but even that is optional.
+This guide walks you through your first LLM API call in about ten minutes on Groq's free tier. I set up a fresh account and captured every step while writing it, so the screenshots show exactly what you will see. All you need is an email address. Python helps for the second half, but even that is optional.
 
 One thing to clear up before we start, because the names trip everyone up. **Groq is not Grok.** Grok is the chatbot from xAI. Groq is a company that runs open AI models on chips built for speed. Similar names, completely different things.
 
@@ -146,7 +146,7 @@ GROQ_API_KEY=your_key_here
 
 If you use Git, add \`.env\` to your \`.gitignore\` right now, before you forget.
 
-Then create \`first_call.py\`. This is the exact code from my own first call, comments and all. This time the model is \`openai/gpt-oss-120b\`, OpenAI's open weight GPT model, which Groq also hosts on the free tier:
+Then create \`first_call.py\`. This is the exact code I ran while putting this tutorial together, comments and all. This time the model is \`openai/gpt-oss-120b\`, OpenAI's open weight GPT model, which Groq also hosts on the free tier:
 
 \`\`\`python
 # first_call.py - your first LLM API call (GPT-OSS on Groq, free)
@@ -174,9 +174,9 @@ Run it:
 python first_call.py
 \`\`\`
 
-Here is my actual run. I pasted the same code into a Jupyter notebook cell in VS Code, which is a comfortable way to try an API one cell at a time:
+Here is that code running in my editor. I pasted it into a Jupyter notebook cell in VS Code, which is a comfortable way to try an API one cell at a time:
 
-![My real first call in VS Code: the Python code and the model's one-sentence answer about loop engineering](/images/blog/groq-first-call/07-vscode-run.png "=1920x680")
+![The tutorial script running in VS Code: the Python code and the model's one-sentence answer about loop engineering](/images/blog/groq-first-call/07-vscode-run.png "=1920x680")
 
 The model answered in one sentence, describing loop engineering as the practice of building iterative feedback cycles, where a model's outputs are evaluated, corrected, and fed back into later prompts to improve the results.
 

@@ -8,7 +8,7 @@ export default function WritingTeaser({ posts }: { posts: Post[] }) {
       id="writing"
       className="mx-auto max-w-6xl scroll-mt-8 px-5 pt-20 sm:px-8"
     >
-      <SectionHeading code="4000" title="Writing" kicker="Ledger of drafts" />
+      <SectionHeading code="4000" title="Writing" kicker="Recent postings" />
 
       <div className="border-t border-rule">
         {posts.map((post) => (
