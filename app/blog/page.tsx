@@ -10,7 +10,7 @@ import { getPosts, getSiteProfile } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Writing",
   description:
-    "Essays on agentic AI for enterprise finance, from your first LLM API call to a production cost model you can reconcile.",
+    "Essays on building agentic AI in production, from your first LLM API call to a cost model you can reconcile.",
   alternates: { canonical: "/blog/" },
 };
 
@@ -50,9 +50,8 @@ export default async function BlogIndexPage() {
       <SectionHeading code="4000" title="Writing" kicker="Index of record" />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
-        Working notes from building agentic AI against real financial
-        systems, written up as essays. New entries post here as the work
-        ships.
+        Working notes from building agentic AI in production, written up
+        as essays. New entries post here as the work ships.
       </p>
 
       <BlogExplorer tags={allTags}>
