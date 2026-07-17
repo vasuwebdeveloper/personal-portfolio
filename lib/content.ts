@@ -54,13 +54,23 @@ export async function getCertifications(): Promise<Certification[]> {
   return [...certifications].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-/** All posts, newest first. Drafts included; the UI decides how to render them. */
+/**
+ * Published posts, newest first. Drafts stay in the content layer as future
+ * work but never reach the site: no route, no index row, no sitemap, search
+ * index, or feed entry, so crawlers can't find or rank them.
+ */
 export async function getPosts(): Promise<Post[]> {
-  return [...posts].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return posts
+    .filter((post) => post.status === "published")
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  return posts.find((post) => post.slug === slug) ?? null;
+  return (
+    posts.find(
+      (post) => post.slug === slug && post.status === "published",
+    ) ?? null
+  );
 }
 
 /** Derived, not stored; stays valid when posts move to a database. */
