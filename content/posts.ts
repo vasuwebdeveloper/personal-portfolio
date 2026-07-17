@@ -19,12 +19,12 @@ export const posts: Post[] = [
   {
     id: "post_groq_first_call",
     slug: "first-llm-api-call-groq",
-    title: "Your first LLM API call: free, no credit card (Groq)",
+    title: "Your first LLM API call on Groq's free tier",
     summary:
-      "Make your first LLM API call in about ten minutes with Groq's free tier. No credit card needed. Step by step with curl and Python, plus common errors.",
+      "Make your first LLM API call in about ten minutes on Groq's free tier. Step-by-step tutorial with curl and Python, API key setup, and common error fixes.",
     body: `Everyone talks about AI. Very few people have actually made an LLM API call from their own code. That first call is a small moment, but it changes how you see all of this. The model stops being a chat window and becomes a building block you can use anywhere.
 
-This guide walks you through your first LLM API call in about ten minutes, free, with no credit card. All you need is an email address. Python helps for the second half, but even that is optional.
+This guide walks you through your first LLM API call in about ten minutes on Groq's free tier. All you need is an email address. Python helps for the second half, but even that is optional.
 
 One thing to clear up before we start, because the names trip everyone up. **Groq is not Grok.** Grok is the chatbot from xAI. Groq is a company that runs open AI models on chips built for speed. Similar names, completely different things.
 
@@ -208,7 +208,7 @@ If you got your first response today, that is a win. Save the script. You will b
     status: "published",
     banner: {
       src: "/blog/banners/first-llm-api-call-groq.png",
-      alt: "Your first LLM API call: free, no credit card (Groq)",
+      alt: "Your first LLM API call on Groq's free tier",
       width: 1200,
       height: 630,
     },
