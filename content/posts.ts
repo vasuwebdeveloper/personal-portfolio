@@ -33,7 +33,7 @@ Here is the plan:
 1. Create a free Groq account
 2. Generate an API key
 3. Make your first LLM API call with curl
-4. Make the same call from Python
+4. Make the call from Python
 5. Try other models
 
 ## Why Groq for your first LLM API call
@@ -46,11 +46,13 @@ The third reason pays off the longest. Groq's API copies OpenAI's request format
 
 ## Step 1: create your free Groq account
 
-Go to [console.groq.com](https://console.groq.com) and sign in with your Google account or an email address. There is no payment step. No card, no trial countdown, nothing to cancel later.
+Go to [console.groq.com](https://console.groq.com) and sign in with your Google account, GitHub, or a plain email address. There is no payment step. No card, no trial countdown, nothing to cancel later.
 
-After signing in, you land in the Groq console. This is home base. The playground lets you chat with models right in the browser, and the usage panel starts counting tokens from your very first request.
+![The Groq console sign-in page: continue with Google, GitHub, SSO, or email](/images/blog/groq-first-call/01-signin.png "=1845x844")
 
-![The Groq console after signing in: playground, docs, and a token usage panel from day one](/images/blog/groq-first-call/01-console.png "=1600x714")
+After signing in, you land in the Groq console. This is home base. The playground lets you chat with models right in the browser, and the token usage chart starts counting from your very first request. Mine reads 14.5K tokens for the last 30 days, all of it from writing this tutorial.
+
+![The Groq console home: token usage chart, playground, docs, and the API Keys tab](/images/blog/groq-first-call/02-console.png "=1896x685")
 
 ## Step 2: create your API key
 
@@ -58,15 +60,19 @@ An API key is a password for your code. It tells Groq that a request came from y
 
 In the console, open the **API Keys** tab. A fresh account has none.
 
-![The API Keys page in the Groq console before any keys exist](/images/blog/groq-first-call/02-apikeys.png "=1482x362")
+![The API Keys page in the Groq console before any keys exist](/images/blog/groq-first-call/03-apikeys.png "=1905x463")
 
-Click **Create API Key** and give it a name you will recognize later, something like \`my-first-key\`. Name keys for the thing that uses them. Once there are twelve of these, \`test-key-2\` is how leaks go unnoticed.
+Click **Create API Key** and give it a name you will recognize later. I named mine \`First LLM API Call\`, after this tutorial. Name keys for the thing that uses them. Once there are twelve of these, \`test-key-2\` is how leaks go unnoticed. The dialog also offers an expiration date; for a learning key, no expiration is fine.
 
-![Creating a Groq API key: display name and expiration](/images/blog/groq-first-call/03-createkey.png "=907x560")
+![Creating a Groq API key: display name and expiration](/images/blog/groq-first-call/04-createkey.png "=915x573")
 
 Copy the key the moment it appears. Groq shows it in full exactly once. Paste it somewhere safe for now.
 
-![The created Groq API key, shown exactly once and redacted here](/images/blog/groq-first-call/04-key-created.png "=1600x841")
+![The created Groq API key, shown exactly once and redacted here](/images/blog/groq-first-call/05-key-created.png "=857x312")
+
+Back on the API Keys page, the console now lists your key with everything but the tail masked. If you closed the dialog without copying, there is no way to see the key again. Delete it and create a new one; they are free.
+
+![The API Keys list after creation, showing only the masked tail of the key](/images/blog/groq-first-call/06-keys-list.png "=1759x417")
 
 Two rules about keys, and I mean both of them:
 
@@ -124,7 +130,7 @@ Two parts of the request will follow you everywhere:
 
 That is the whole shape of a chat completion. Groq copied OpenAI's format on purpose, so this exact structure will greet you at almost every LLM API you touch next.
 
-## Step 4: the same call from Python
+## Step 4: the call from Python
 
 The terminal is fine for a test. Real projects live in code. Install two small packages (Python 3.8 or newer):
 
@@ -140,20 +146,22 @@ GROQ_API_KEY=your_key_here
 
 If you use Git, add \`.env\` to your \`.gitignore\` right now, before you forget.
 
-Then create \`first_call.py\`:
+Then create \`first_call.py\`. This is the exact code from my own first call, comments and all. This time the model is \`openai/gpt-oss-120b\`, OpenAI's open weight GPT model, which Groq also hosts on the free tier:
 
 \`\`\`python
+# first_call.py - your first LLM API call (GPT-OSS on Groq, free)
+
 from dotenv import load_dotenv
 from groq import Groq
 
-load_dotenv()
+load_dotenv()  # reads GROQ_API_KEY from your .env file
 
 client = Groq()
 
 response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",  # OpenAI's open weight GPT model, free on Groq
     messages=[
-        {"role": "user", "content": "Explain what an API is in one short sentence."}
+        {"role": "user", "content": "What is loop engineering in prompt engineering? Keep it brief in one sentence."}
     ],
 )
 
@@ -166,20 +174,20 @@ Run it:
 python first_call.py
 \`\`\`
 
-One clean sentence comes back, along these lines:
+Here is my actual run. I pasted the same code into a Jupyter notebook cell in VS Code, which is a comfortable way to try an API one cell at a time:
 
-\`\`\`
-An API is a set of rules that lets two programs talk to each other.
-\`\`\`
+![My real first call in VS Code: the Python code and the model's one-sentence answer about loop engineering](/images/blog/groq-first-call/07-vscode-run.png "=1920x680")
+
+The model answered in one sentence, describing loop engineering as the practice of building iterative feedback cycles, where a model's outputs are evaluated, corrected, and fed back into later prompts to improve the results.
 
 Notice what you did not do. You never typed the key into the script. \`load_dotenv\` reads the \`.env\` file, and the Groq client finds \`GROQ_API_KEY\` on its own. This is the habit that keeps keys out of leaked repositories, and now you have it from day one.
 
 ## Step 5: try other models
 
-One key opens every model Groq hosts: Llama models, OpenAI's open weight gpt-oss models, and more. Switching means changing one line:
+One key opens every model Groq hosts: Llama models, OpenAI's open weight gpt-oss models, and more. You already used one of each. The curl call ran Llama, and the Python script ran gpt-oss. Switching means changing one line:
 
 \`\`\`python
-model="openai/gpt-oss-120b",
+model="llama-3.3-70b-versatile",
 \`\`\`
 
 Model names retire as new versions arrive, so trust the console's **Models** page over any blog post, including this one. You can also ask the API itself for the current list:
@@ -199,7 +207,7 @@ Three errors cover almost every first-day problem with a Groq API call:
 
 ## What you just unlocked
 
-You created a key, made a raw LLM API call from the terminal, and then made the same call from Python without ever exposing that key. This is the foundation under every AI feature you have used. Chatbots, summarizers, agents: all of them start with this exact request and response.
+You created a key, made a raw LLM API call from the terminal, and then made a call from Python without ever exposing that key. This is the foundation under every AI feature you have used. Chatbots, summarizers, agents: all of them start with this exact request and response.
 
 From here you can play with settings like \`temperature\`, feed the model your own data, or wire it into the software you already run at work. That last one is where this blog is headed, starting with [calling an LLM from inside an ERP](/blog/ai-agents-netsuite-mcp/).
 
