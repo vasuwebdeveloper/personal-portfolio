@@ -4,9 +4,9 @@ import { getPosts, getSiteProfile } from "@/lib/content";
  * RSS 2.0 feed, generated at build time from the content layer and emitted
  * as a static file by the export.
  *
- * Published posts only: drafts are public pages on the site (that's the
- * "drafts on the desk" brand), but a feed subscription is a request for
- * finished essays. The feed is validly empty until the first post ships.
+ * Published posts only. getPosts() already excludes drafts site-wide; the
+ * publishedAt filter below is belt and suspenders for the feed, which must
+ * never carry an undated item. Validly empty until the first post ships.
  */
 export const dynamic = "force-static";
 
@@ -50,7 +50,7 @@ ${post.tags.map((tag) => `      <category>${esc(tag)}</category>`).join("\n")}
     <link>${base}/blog/</link>
     <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml"/>
     <description>${esc(
-      "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+      "Essays on building agentic AI in production, from your first LLM API call to a cost model you can reconcile.",
     )}</description>
     <language>en</language>
 ${newest ? `    <lastBuildDate>${new Date(newest).toUTCString()}</lastBuildDate>` : ""}

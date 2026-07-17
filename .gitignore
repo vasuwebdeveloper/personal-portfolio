@@ -22,3 +22,7 @@ next-env.d.ts
 
 # env (none used yet; reserved for the future backend)
 .env*
+
+# local blog source material (screenshots, notebooks, notes); the site
+# only serves copies placed under public/, never this folder directly
+/Blog Artifacts/

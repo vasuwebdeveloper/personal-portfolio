@@ -34,7 +34,7 @@ export async function generateMetadata({
   return {
     title: `Writing · page ${n}`,
     description:
-      "Essays on agentic AI for enterprise finance: RAG internals, real LLM cost models, and wiring AI agents into NetSuite over MCP.",
+      "Essays on building agentic AI in production, from your first LLM API call to a cost model you can reconcile.",
     // Page 1 is an alias of /blog/, so canonicalize it there.
     alternates: { canonical: n === "1" ? "/blog/" : `/blog/page/${n}/` },
   };
