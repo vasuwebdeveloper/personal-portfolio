@@ -166,6 +166,8 @@ Run it:
 python first_call.py
 \`\`\`
 
+One clean sentence comes back, along these lines:
+
 \`\`\`
 An API is a set of rules that lets two programs talk to each other.
 \`\`\`
