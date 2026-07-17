@@ -37,6 +37,10 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · ${profile.name}`,
     },
     description: profile.description,
+    // Google Search Console ownership proof; removing it un-verifies the site.
+    verification: {
+      google: "9Ljosrv3RaiJZWNzEa7XJUs-zx7dDhRMqp624ashsdk",
+    },
     openGraph: {
       type: "website",
       url: "/",
