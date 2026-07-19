@@ -42,9 +42,9 @@ export default async function ToolsIndexPage() {
       />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
-        Small, sharp utilities from the unglamorous middle of the
-        enterprise. Each one runs entirely in your browser: nothing you
-        load here is uploaded, logged, or stored.
+        Small, sharp utilities for everyday enterprise work. Each one runs
+        entirely in your browser: nothing you load here is uploaded,
+        logged, or stored.
       </p>
 
       {/* Card grid; scales to a dozen tools before it needs rethinking. */}
