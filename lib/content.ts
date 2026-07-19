@@ -13,12 +13,14 @@ import { flagshipCaseStudy } from "@/content/flagship";
 import { posts } from "@/content/posts";
 import { siteProfile } from "@/content/site";
 import { skillPillars } from "@/content/skills";
+import { tools } from "@/content/tools";
 import type {
   CaseStudy,
   Certification,
   Post,
   SiteProfile,
   SkillPillar,
+  Tool,
 } from "@/content/types";
 
 export async function getSiteProfile(): Promise<SiteProfile> {
@@ -71,6 +73,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       (post) => post.slug === slug && post.status === "published",
     ) ?? null
   );
+}
+
+export async function getTools(): Promise<Tool[]> {
+  return [...tools].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function getToolBySlug(slug: string): Promise<Tool | null> {
+  return tools.find((tool) => tool.slug === slug) ?? null;
 }
 
 /** Derived, not stored; stays valid when posts move to a database. */

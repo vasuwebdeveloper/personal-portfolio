@@ -8,6 +8,7 @@
     "build": "next build",
     "postbuild": "node scripts/verify-og.mjs",
     "preview": "npx serve@latest out",
+    "test": "vitest run",
     "generate:og": "node scripts/generate-og.mjs",
     "generate:portrait": "node scripts/generate-portrait.mjs",
     "generate:banner": "node scripts/generate-blog-banner.mjs"
@@ -30,6 +31,7 @@
     "postcss": "^8.5.16",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   }
 }
