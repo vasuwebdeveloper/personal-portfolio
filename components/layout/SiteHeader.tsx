@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { code: "3000", label: "Certifications", href: "/#certifications" },
   { code: "4000", label: "Writing", href: "/blog/" },
   { code: "5000", label: "Contact", href: "/#contact" },
+  { code: "6000", label: "Tools", href: "/tools/" },
 ] as const;
 
 export default function SiteHeader({ profile }: { profile: SiteProfile }) {

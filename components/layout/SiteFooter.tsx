@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SiteProfile } from "@/content/types";
 
 export default function SiteFooter({ profile }: { profile: SiteProfile }) {
@@ -18,6 +19,14 @@ export default function SiteFooter({ profile }: { profile: SiteProfile }) {
             © {year} {profile.name}
           </p>
           <ul className="flex flex-wrap gap-x-5 gap-y-1">
+            <li>
+              <Link
+                href="/tools/"
+                className="font-mono text-xs text-ink-muted transition-colors hover:text-stamp-deep"
+              >
+                Tools
+              </Link>
+            </li>
             <li>
               <a
                 href={`mailto:${profile.email}`}

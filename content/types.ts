@@ -104,6 +104,21 @@ export interface CaseStudy {
   outcomes: string | null;
 }
 
+/** Row shape for a future `tools` table. */
+export interface Tool {
+  id: string;
+  slug: string;
+  /** Document code shown in the UI, e.g. "TOOL-001". */
+  code: string;
+  title: string;
+  /** One-line description for the index card and metadata. */
+  description: string;
+  status: "live" | "coming-soon";
+  sortOrder: number;
+  createdAt: string; // ISO 8601
+  updatedAt: string; // ISO 8601
+}
+
 export interface SocialLink {
   id: string;
   label: string;
