@@ -17,15 +17,17 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 export default function NachaValidator() {
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [fileName, setFileName] = useState<string>("");
+  const [isSample, setIsSample] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
   const [pasted, setPasted] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
-  function runValidation(text: string, name: string) {
+  function runValidation(text: string, name: string, sample = false) {
     setInputError(null);
     setFileName(name);
+    setIsSample(sample);
     setResult(validateNachaFile(text));
     // Move the report into view; the aria-live region announces the outcome.
     requestAnimationFrame(() => {
@@ -64,6 +66,7 @@ export default function NachaValidator() {
   function reset() {
     setResult(null);
     setFileName("");
+    setIsSample(false);
     setInputError(null);
     setPasted("");
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -124,10 +127,12 @@ export default function NachaValidator() {
             </button>
             <button
               type="button"
-              onClick={() => runValidation(SAMPLE_NACHA_FILE, SAMPLE_FILE_NAME)}
+              onClick={() =>
+                runValidation(SAMPLE_NACHA_FILE, SAMPLE_FILE_NAME, true)
+              }
               className="border border-ink-muted px-5 py-2.5 font-mono text-[0.75rem] font-medium tracking-[0.14em] uppercase text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper"
             >
-              Load sample file
+              Try a sample file
             </button>
           </div>
           <p className="mt-5 font-mono text-[0.6875rem] tracking-[0.08em] text-ink-muted">
@@ -199,6 +204,14 @@ export default function NachaValidator() {
               Validate another file ×
             </button>
           </div>
+
+          {isSample ? (
+            <p className="mt-3 font-mono text-[0.75rem] leading-relaxed text-ink-muted">
+              This is bundled demo data, not a file from your computer. Every
+              company, name, and routing number in it is fictional, and it is
+              seeded with problems on purpose so you can see how findings look.
+            </p>
+          ) : null}
 
           {/* Summary tiles */}
           <dl className="mt-6 grid grid-cols-2 gap-px border border-rule bg-rule lg:grid-cols-4">
