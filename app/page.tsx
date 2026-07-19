@@ -5,6 +5,7 @@ import Certifications from "@/components/sections/Certifications";
 import FlagshipCaseStudy from "@/components/sections/FlagshipCaseStudy";
 import Hero from "@/components/sections/Hero";
 import WritingTeaser from "@/components/sections/WritingTeaser";
+import JsonLd from "@/components/ui/JsonLd";
 import {
   getCertifications,
   getFlagshipCaseStudy,
@@ -12,6 +13,7 @@ import {
   getSiteProfile,
   getSkillPillars,
 } from "@/lib/content";
+import { personSchema, webSiteSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -29,6 +31,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={personSchema(profile)} />
+      <JsonLd data={webSiteSchema(profile)} />
       <Hero profile={profile} caseStudy={caseStudy} />
       <FlagshipCaseStudy caseStudy={caseStudy} />
       <Capabilities pillars={pillars} />

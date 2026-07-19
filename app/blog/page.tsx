@@ -3,6 +3,7 @@ import Link from "next/link";
 import BlogExplorer from "@/components/blog/BlogExplorer";
 import Pager from "@/components/blog/Pager";
 import PostListRows from "@/components/blog/PostListRows";
+import JsonLd from "@/components/ui/JsonLd";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { paginatePosts, postDate } from "@/lib/blog";
 import { getPosts, getSiteProfile } from "@/lib/content";
@@ -41,11 +42,7 @@ export default async function BlogIndexPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
-      <script
-        type="application/ld+json"
-        // Static JSON derived from the content layer; no user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       <SectionHeading code="4000" title="Writing" kicker="Index of record" />
 

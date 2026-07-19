@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import PostBody from "@/components/blog/PostBody";
 import ShareRow from "@/components/blog/ShareRow";
 import Toc from "@/components/blog/Toc";
+import JsonLd from "@/components/ui/JsonLd";
 import {
   extractH2s,
   formatDate,
@@ -17,6 +18,7 @@ import {
   getPosts,
   getSiteProfile,
 } from "@/lib/content";
+import { blogPostingSchema } from "@/lib/schema";
 
 /**
  * Statically generated from the content layer. When the site moves to a
@@ -85,33 +87,9 @@ export default async function BlogPostPage({
   const older = index < posts.length - 1 ? posts[index + 1] : null;
   const linkedIn = profile.links.find((l) => l.label === "LinkedIn");
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.summary,
-    datePublished: postDate(post),
-    dateModified: post.updatedAt,
-    url: postUrl,
-    mainEntityOfPage: postUrl,
-    ...(post.banner
-      ? { image: `${profile.siteUrl}${post.banner.src}` }
-      : {}),
-    author: {
-      "@type": "Person",
-      name: profile.name,
-      url: profile.siteUrl,
-      sameAs: profile.links.map((l) => l.href),
-    },
-  };
-
   return (
     <div className="mx-auto max-w-5xl px-5 pt-12 sm:px-8 sm:pt-16">
-      <script
-        type="application/ld+json"
-        // Static JSON derived from the content layer; no user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={blogPostingSchema(post, profile)} />
 
       <div
         className={

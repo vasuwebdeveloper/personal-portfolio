@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import NachaValidator from "@/components/tools/NachaValidator";
+import JsonLd from "@/components/ui/JsonLd";
 import { getSiteProfile, getToolBySlug } from "@/lib/content";
 
 const TITLE = "NACHA File Validator";
@@ -94,15 +95,8 @@ export default async function NachaValidatorPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 pt-12 sm:px-8 sm:pt-16">
-      <script
-        type="application/ld+json"
-        // Static JSON derived from this file's constants; no user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
+      <JsonLd data={softwareJsonLd} />
+      <JsonLd data={faqJsonLd} />
 
       <p className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <Link

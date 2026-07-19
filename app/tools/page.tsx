@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import JsonLd from "@/components/ui/JsonLd";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getSiteProfile, getTools } from "@/lib/content";
 
@@ -29,11 +30,7 @@ export default async function ToolsIndexPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
-      <script
-        type="application/ld+json"
-        // Static JSON derived from the content layer; no user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       <SectionHeading
         code="6000"
