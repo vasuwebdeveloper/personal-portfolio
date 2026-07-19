@@ -6,7 +6,7 @@ import { getSiteProfile, getTools } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Tools",
   description:
-    "Free, in-browser utilities for finance and ERP teams: validate NACHA (ACH) payment files before the bank rejects them. Nothing you load is ever uploaded.",
+    "Free, in-browser utilities for enterprise teams: validate NACHA (ACH) payment files before the bank rejects them. Nothing you load is ever uploaded.",
   alternates: { canonical: "/tools/" },
 };
 
@@ -42,9 +42,9 @@ export default async function ToolsIndexPage() {
       />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
-        Small, sharp utilities from the unglamorous middle of enterprise
-        finance. Each one runs entirely in your browser: nothing you load
-        here is uploaded, logged, or stored.
+        Small, sharp utilities from the unglamorous middle of the
+        enterprise. Each one runs entirely in your browser: nothing you
+        load here is uploaded, logged, or stored.
       </p>
 
       {/* Card grid; scales to a dozen tools before it needs rethinking. */}
