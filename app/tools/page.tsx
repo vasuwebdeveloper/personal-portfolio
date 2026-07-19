@@ -38,7 +38,7 @@ export default async function ToolsIndexPage() {
       <SectionHeading
         code="6000"
         title="Tools"
-        kicker="Utilities, free of charge"
+        kicker="In-browser utilities"
       />
 
       <p className="max-w-[62ch] text-lg leading-relaxed">
