@@ -372,6 +372,363 @@ Keep the rates in exactly one place in your model, because they change often and
     createdAt: "2026-07-11T00:00:00.000Z",
     updatedAt: "2026-07-11T00:00:00.000Z",
   },
+  {
+    id: "post_jev_vs_llm",
+    slug: "what-is-jev-ai-vs-llm",
+    title: "What is Jev? How it differs from an LLM, with a working invoice example",
+    summary:
+      "Jev is TypeSafe AI's decision model. See how it differs from an LLM on one vendor invoice, the data each returns, and Python code you can run in VS Code.",
+    body: `TypeSafe AI released a new model called Jev on 15 September 2026. It does something most AI models don't do. It never writes a sentence.
+
+When I first read about it, I found the difference from an LLM hard to picture. So I built two small Python scripts that check the same vendor invoice. One uses only an LLM. The other uses Jev with an LLM. This post walks through both, with the data each one returns and the code you can run yourself.
+
+## Jev in one minute
+
+- Jev is an AI model from TypeSafe AI, a San Francisco company founded in 2024.
+- You give it some data and a few questions.
+- For each question, you list the answers it is allowed to give.
+- It returns one of those answers with a probability.
+- It answers all the questions in one call.
+- It never returns free text.
+
+TypeSafe calls this a **System One** model. The name comes from psychology. System One is fast, instinctive judgment. System Two is slow, step by step thinking. Jev is built for the fast part.
+
+Jev supports three types of question:
+
+| Type | What it does | What you get back |
+|---|---|---|
+| Choice | Picks one option from your list | The option, a probability for each option and a confidence score |
+| Score | Rates against levels you define | A score, a probability for each level and a confidence score |
+| Noul | Answers yes or no | A probability from 0 to 1 |
+
+## The difference, seen as data
+
+The easiest way to see the difference is to look at what each model gives your system.
+
+Say you ask about three invoices. An LLM gives you text. It is like filling a Memo field:
+
+| Invoice | LLM output |
+|---|---|
+| INV-2291 | "This looks like a duplicate of a paid invoice. I would treat it as high risk." |
+| INV-2317 | "Normal office supplies order. Low risk, no duplicate found." |
+| INV-2330 | "Probably IT hardware. Medium risk because the amount is above the PO." |
+
+The wording changes every time. Your code has to read the sentence and work out what it means.
+
+Jev gives you typed values. It is like filling list fields and a checkbox:
+
+| Invoice | Category | Risk (0 to 2) | Duplicate | Confidence |
+|---|---|---|---|---|
+| INV-2291 | Office supplies | 1.66 | 0.95 | 0.88 |
+| INV-2317 | Office supplies | 0.20 | 0.03 | 0.91 |
+| INV-2330 | IT hardware | 0.94 | 0.05 | 0.76 |
+
+Every value comes from a list you defined. You can filter on it, route on it and report on it. A low confidence value tells you a person should look at the record.
+
+*The values in these tables are examples to show the shape of the data.*
+
+## Jev and LLM at a glance
+
+| | Jev | LLM |
+|---|---|---|
+| What it returns | Typed values with probabilities | Text |
+| Possible answers | Only the ones you list | Anything |
+| Confidence | Included with every answer | Not included |
+| Can it write an email? | No | Yes |
+| Can it plan several steps? | No | Yes |
+| Reported speed | 70 to 500 ms per call | Often a few seconds |
+| Best used for | Classify, score, check, route | Write, summarise, explain, investigate |
+
+TypeSafe also says Jev is 40 to 200 times faster and 40 to 400 times cheaper than large LLMs on similar tasks. These numbers come from TypeSafe's own tests, and the company says real results are likely to be lower. Test it on your own data before you rely on them. If you keep [a working ledger of what an LLM costs in production](/blog/real-cost-of-llms-in-production/), you already know why fewer large model calls matter.
+
+## The example: one vendor invoice
+
+Both scripts check this invoice:
+
+- **Invoice:** INV-2291 from Northwind Supplies
+- **Amount:** $4,860.00 against PO-7741
+- **Vendor note:** "Resubmitting the March invoice, please process."
+- **AP record:** INV-2291 was already paid on 12 March
+
+We want three answers:
+
+- Which spend category is it?
+- How risky is it to pay?
+- Is it a duplicate?
+
+If it is a duplicate, the AP team also needs a review note and an email to the vendor.
+
+![One vendor invoice going into Jev and three structured answers coming out: spend category, payment risk and duplicate probability](/images/blog/jev-vs-llm/slide-1-invoice.png "=2160x2700")
+
+## Without Jev: the LLM does everything
+
+This is how most teams use AI today. One LLM call does the whole job.
+
+1. Your code sends the invoice and the paid invoices to the LLM.
+2. The LLM picks the category, judges the risk and checks for duplicates.
+3. It writes the AP note and the vendor email in the same reply.
+4. Your code parses the JSON and checks every value.
+5. If anything is missing or wrong, your code has to retry.
+6. This happens for every invoice, including the normal ones.
+
+Here is the part that does the work. The complete file is in the download at the end of this post:
+
+\`\`\`python
+# Step 1: one prompt asks the LLM to do everything.
+prompt = f"""You are an accounts payable assistant.
+Check the new invoice against the invoices we already paid.
+Reply with JSON only, using exactly these keys:
+  "category": one of "Office supplies", "IT hardware", "Facilities"
+  "risk": one of "Low", "Medium", "High"
+  "duplicate": true or false
+  "ap_note": a short note for the AP reviewer
+  "vendor_email": a short email to the vendor, or "" if none is needed
+
+New invoice:
+{json.dumps(new_invoice, indent=2)}
+
+Invoices already paid:
+{json.dumps(PAID_INVOICES, indent=2)}
+"""
+
+reply = llm.chat.completions.create(
+    model=LLM_MODEL,
+    messages=[{"role": "user", "content": prompt}],
+    response_format={"type": "json_object"},
+)
+
+# Step 2: the reply is text, so our code parses and checks it.
+result = json.loads(reply.choices[0].message.content)
+if result.get("category") not in ["Office supplies", "IT hardware", "Facilities"]:
+    ...  # log it, retry the call, or send the invoice to a person
+\`\`\`
+
+Running it prints something like this. The values are examples, and yours will differ:
+
+\`\`\`
+Invoice INV-2291: sending everything to the LLM...
+
+--- Raw LLM reply ---
+{"category": "Office supplies", "risk": "High", "duplicate": true,
+ "ap_note": "...", "vendor_email": "..."}
+
+--- What our code can use ---
+Category:   Office supplies
+Risk:       High
+Duplicate:  True
+Confidence: not provided by the LLM
+
+Decision: hold payment and send to AP review.
+
+LLM calls: 1   Time: 2.84 s
+\`\`\`
+
+What to notice:
+
+- The LLM's answers arrive as text inside JSON.
+- The code has to check that each value is one it expects.
+- There is no confidence score, so you can't tell a sure answer from a guess.
+- The normal invoice (\`--clean\`) costs a full LLM call too.
+
+## With Jev: Jev decides, the LLM writes
+
+Now the work is split between Jev, your code and the LLM.
+
+1. Your code sends the invoice and the paid invoices to Jev with three questions.
+2. Jev returns the category, the risk score and the duplicate probability.
+3. Your code compares those values with your rules.
+4. A clean invoice is approved. The LLM is never called.
+5. A flagged invoice gets a small handoff built from Jev's answers.
+6. The LLM uses the handoff to write the AP note and the vendor email.
+7. Jev checks the draft against your policy.
+8. The draft goes to an AP reviewer.
+
+![The AP workflow without Jev and with Jev, showing the handoff the LLM receives and the policy check on its draft](/images/blog/jev-vs-llm/slide-2-workflow.png "=2160x2700")
+
+Here is the part that matters, the questions and the rules:
+
+\`\`\`python
+# Step 1: three questions, each with its allowed answers.
+questions = {
+    "category": Choice(
+        instructions="Which spend category does the new invoice belong to?",
+        criteria={
+            "Office supplies": "Paper, stationery and desk items",
+            "IT hardware": "Laptops, monitors and network equipment",
+            "Facilities": "Cleaning, repairs, rent and utilities",
+        },
+    ),
+    "risk": Score(
+        instructions="How risky is it to pay the new invoice?",
+        criteria=[
+            "Low: known vendor, matches the PO, nothing unusual",
+            "Medium: a small mismatch or something to check",
+            "High: likely duplicate, wrong amount or unusual request",
+        ],
+    ),
+    "duplicate": Noul(
+        instructions="The new invoice matches an invoice in paid_invoices "
+        "and has already been paid.",
+    ),
+}
+
+with TypeSafeClient() as jev:
+    response = jev.system_one(state=state, questions=questions)
+
+# Step 2: the answers are typed, so the rules are plain code.
+duplicate = response.answers["duplicate"].noul
+if duplicate >= DUPLICATE_LIMIT:
+    reasons.append("likely duplicate")
+\`\`\`
+
+For the duplicate invoice it prints something like this:
+
+\`\`\`
+Invoice INV-2291: asking Jev three questions...
+
+--- Jev answers (ready to use, no parsing) ---
+Category:   Office supplies   confidence 0.88
+            probabilities {'Office supplies': 0.91, 'IT hardware': 0.07, 'Facilities': 0.02}
+Risk score: 1.66 out of 2   confidence 0.70
+Duplicate:  P(yes) = 0.95
+
+Decision: hold payment. Reasons: likely duplicate, high payment risk.
+\`\`\`
+
+And for the normal invoice:
+
+\`\`\`
+Invoice INV-2317: asking Jev three questions...
+
+--- Jev answers (ready to use, no parsing) ---
+Category:   Office supplies   confidence 0.91
+Risk score: 0.20 out of 2   confidence 0.84
+Duplicate:  P(yes) = 0.03
+
+Decision: clean invoice. Approve for payment.
+
+LLM calls: 0
+\`\`\`
+
+What to notice:
+
+- Jev's answers are ready to use. There is no parsing step.
+- Every answer comes with a probability, so the rules in code are simple.
+- The normal invoice finishes with zero LLM calls.
+- The LLM only runs when a person needs something to read.
+
+## What the LLM receives
+
+Jev never calls the LLM. Your code reads Jev's answers and builds a small handoff like this one:
+
+\`\`\`json
+{
+  "invoice": "INV-2291",
+  "vendor": "Northwind Supplies",
+  "amount": 4860.0,
+  "category": "Office supplies (0.88)",
+  "risk_score": "1.66 out of 2",
+  "duplicate_probability": 0.95,
+  "hold_reasons": ["likely duplicate", "high payment risk"],
+  "task": "Write a short AP review note and a polite email to the vendor."
+}
+\`\`\`
+
+The decisions are already made. The LLM only has to turn these facts into a note and an email a person can read. Your code is in the middle of every step. It sends data to Jev, reads the answers, decides what happens and calls the LLM only when it is needed.
+
+
+## Side by side
+
+| | Without Jev | With Jev |
+|---|---|---|
+| LLM calls for a normal invoice | 1 | 0 |
+| LLM calls for a flagged invoice | 1 | 1 |
+| Who makes the decisions | The LLM | Jev |
+| Output your code gets | Text to parse and check | Typed values |
+| Confidence | None | On every answer |
+| What the LLM does | Everything | Writes the note and the email |
+| Check on the LLM's draft | None | Jev policy check |
+
+If most of your invoices are normal, that is where Jev saves the most. Those invoices never reach the LLM.
+
+## Run it yourself in VS Code
+
+The whole project is five small files: \`invoice.py\` with the sample data, \`without_jev.py\`, \`with_jev.py\`, \`requirements.txt\` and a README with the setup steps for Windows and macOS.
+
+[Download the demo project (zip, 11 KB)](/downloads/jev-invoice-demo.zip)
+
+You need:
+
+- Python 3.10 or newer and VS Code
+- A TypeSafe API key from [console.typesafe.ai](https://console.typesafe.ai/keys). Jev is in early access.
+- A Groq API key from [console.groq.com](https://console.groq.com/keys). The free tier is enough. If you have never made an LLM API call, [start with this walkthrough](/blog/first-llm-api-call-groq/).
+
+Unzip it, put your keys in a \`.env\` file as the README shows, install the requirements, and run:
+
+\`\`\`bash
+python without_jev.py
+python with_jev.py
+python without_jev.py --clean
+python with_jev.py --clean
+\`\`\`
+
+Compare the number of LLM calls and the time printed at the end of each run. Your numbers will be different from mine, and they change from run to run.
+
+
+## Does Jev reason like an LLM?
+
+Jev reads the input once and scores each allowed answer in one pass. It works like fast instinct. It gives you the answer and the probability, without the reasoning behind it.
+
+Some cases need several steps of thinking. For example, a vendor says a credit note was applied to the wrong invoice across three orders. Jev can flag that case as risky. Working out what actually happened is a job for the LLM or a person. A low confidence score is a good sign that a case belongs there.
+
+## Before you use Jev
+
+- **Early access.** Jev is only available in limited early access for now.
+- **Self reported numbers.** The speed and cost figures have not been widely tested by others yet.
+- **Closed model.** There are no public weights or technical paper.
+- **Your answer lists matter.** Jev picks well only when your options are clear and do not overlap.
+- **Controls stay in code.** A clear answer can still be wrong. Keep your 3 way match, approval limits and payment rules in your own system.
+
+## Frequently asked questions
+
+### Is Jev an LLM?
+Jev never generates text. It returns typed answers with probabilities. TypeSafe describes it as a transformer based model built for decisions.
+
+### Can Jev replace ChatGPT or Claude?
+They do different jobs. Jev makes structured decisions. An LLM writes and reasons. Most teams will use both.
+
+### Does Jev hallucinate?
+Jev can only return an answer from your list, so it can't make up content. It can still pick the wrong option. That is why the confidence score matters.
+
+### Does Jev send data to the LLM?
+Your code sits between them. It reads Jev's answers and builds the request to the LLM when one is needed.
+
+### Can I use Jev for invoice processing?
+Yes. It can classify spend, score payment risk and flag likely duplicates. Your ERP rules and AP reviewers still make the final payment decision.
+
+### Why is it called Jev?
+It is named after the economist William Stanley Jevons. The Jevons paradox says that when something gets cheaper to use, people use more of it. TypeSafe expects the same to happen with AI decisions.
+
+## Sources
+
+- [Jev (AI model), Wikipedia](https://en.wikipedia.org/wiki/Jev_(AI_model))
+- [Introducing System One Models & Jev, TypeSafe AI](https://typesafe.ai/blog/introducing-system-one-models-and-jev)
+- [TypeSafe AI quickstart](https://docs.typesafe.ai/introduction/quickstart)
+- [TypeSafe Python SDK](https://docs.typesafe.ai/sdk/python)
+- [TypeSafe AI's Jev offers an alternative to LLMs, Tom's Hardware](https://www.tomshardware.com/tech-industry/artificial-intelligence/typesafe-ais-jev-offers-an-alternative-to-llms-that-claims-to-be-193x-faster-and-445x-cheaper-system-one-type-model-is-bespoke-for-probabilistic-decision-making)
+- [What Is Jev? A Guide to TypeSafe AI's System One Model, LangChain](https://www.langchain.com/blog/building-a-harness-with-jev)`,
+    tags: ["Jev", "TypeSafe AI", "LLM"],
+    status: "published",
+    banner: {
+      src: "/blog/banners/what-is-jev-ai-vs-llm.png",
+      alt: "What is Jev? How it differs from an LLM, with a working invoice example",
+      width: 1200,
+      height: 630,
+    },
+    publishedAt: "2026-09-26T00:00:00.000Z",
+    createdAt: "2026-09-26T00:00:00.000Z",
+    updatedAt: "2026-09-26T00:00:00.000Z",
+  },
 ];
 
 /* ── POST TEMPLATE: copy, fill in, add to the array above ───────────────────
