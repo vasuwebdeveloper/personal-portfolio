@@ -634,13 +634,8 @@ Jev never calls the LLM. Your code reads Jev's answers and builds a small handof
 }
 \`\`\`
 
-The decisions are already made. The LLM only has to turn these facts into a note and an email a person can read.
+The decisions are already made. The LLM only has to turn these facts into a note and an email a person can read. Your code is in the middle of every step. It sends data to Jev, reads the answers, decides what happens and calls the LLM only when it is needed.
 
-## How the data moves
-
-![The full data flow: the invoice goes to Jev, your rules split clean from flagged, and only flagged invoices reach the LLM before a policy check and the AP reviewer](/images/blog/jev-vs-llm/slide-3-dataflow.png "=2160x1320")
-
-Your code is in the middle of every step. It sends data to Jev, reads the answers, decides what happens and calls the LLM only when it is needed.
 
 ## Side by side
 
