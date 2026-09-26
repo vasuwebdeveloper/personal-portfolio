@@ -471,34 +471,10 @@ This is how most teams use AI today. One LLM call does the whole job.
 5. If anything is missing or wrong, your code has to retry.
 6. This happens for every invoice, including the normal ones.
 
-Here is the script:
+Here is the part that does the work. The complete file is in the download at the end of this post:
 
 \`\`\`python
-# Without Jev: one LLM call does every step for every invoice.
-# Run:  python without_jev.py          (duplicate invoice)
-#       python without_jev.py --clean  (normal invoice)
-
-import json
-import os
-import sys
-import time
-
-from dotenv import load_dotenv
-from openai import OpenAI
-
-from invoice import PAID_INVOICES, pick_invoice
-
-load_dotenv()
-
-llm = OpenAI(
-    api_key=os.environ["GROQ_API_KEY"],
-    base_url="https://api.groq.com/openai/v1",
-)
-LLM_MODEL = "openai/gpt-oss-20b"
-
-new_invoice = pick_invoice(sys.argv)
-
-# Step 1: ask the LLM to do everything in one prompt.
+# Step 1: one prompt asks the LLM to do everything.
 prompt = f"""You are an accounts payable assistant.
 Check the new invoice against the invoices we already paid.
 Reply with JSON only, using exactly these keys:
@@ -515,53 +491,16 @@ Invoices already paid:
 {json.dumps(PAID_INVOICES, indent=2)}
 """
 
-print(f"\\nInvoice {new_invoice['invoice_number']}: sending everything to the LLM...")
-start = time.perf_counter()
 reply = llm.chat.completions.create(
     model=LLM_MODEL,
     messages=[{"role": "user", "content": prompt}],
     response_format={"type": "json_object"},
 )
-seconds = time.perf_counter() - start
-text = reply.choices[0].message.content
 
-print("\\n--- Raw LLM reply ---")
-print(text)
-
-# Step 2: our code has to parse and check the text before it can use it.
-try:
-    result = json.loads(text)
-except json.JSONDecodeError:
-    print("\\nThe reply is not valid JSON. The code would need to retry.")
-    sys.exit(1)
-
-problems = []
+# Step 2: the reply is text, so our code parses and checks it.
+result = json.loads(reply.choices[0].message.content)
 if result.get("category") not in ["Office supplies", "IT hardware", "Facilities"]:
-    problems.append(f"Unknown category: {result.get('category')}")
-if result.get("risk") not in ["Low", "Medium", "High"]:
-    problems.append(f"Unknown risk level: {result.get('risk')}")
-if not isinstance(result.get("duplicate"), bool):
-    problems.append(f"Duplicate is not true or false: {result.get('duplicate')}")
-
-print("\\n--- What our code can use ---")
-if problems:
-    print("The reply needs a retry:")
-    for problem in problems:
-        print(f"  {problem}")
-    sys.exit(1)
-
-print(f"Category:   {result['category']}")
-print(f"Risk:       {result['risk']}")
-print(f"Duplicate:  {result['duplicate']}")
-print("Confidence: not provided by the LLM")
-
-# Step 3: decide the next step.
-if result["duplicate"] or result["risk"] == "High":
-    print("\\nDecision: hold payment and send to AP review.")
-else:
-    print("\\nDecision: approve for payment.")
-
-print(f"\\nLLM calls: 1   Time: {seconds:.2f} s   Tokens: {reply.usage.total_tokens}")
+    ...  # log it, retry the call, or send the invoice to a person
 \`\`\`
 
 Running it prints something like this. The values are examples, and yours will differ:
@@ -606,42 +545,10 @@ Now the work is split between Jev, your code and the LLM.
 
 ![The AP workflow without Jev and with Jev, showing the handoff the LLM receives and the policy check on its draft](/images/blog/jev-vs-llm/slide-2-workflow.png "=2160x2700")
 
-Here is the script:
+Here is the part that matters, the questions and the rules:
 
 \`\`\`python
-# With Jev: Jev makes the decisions, our code applies the rules,
-# and the LLM is called only when a person needs to read something.
-# Run:  python with_jev.py          (duplicate invoice)
-#       python with_jev.py --clean  (normal invoice)
-
-import json
-import os
-import sys
-import time
-
-from dotenv import load_dotenv
-from openai import OpenAI
-from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
-
-from invoice import PAID_INVOICES, pick_invoice
-
-load_dotenv()
-
-llm = OpenAI(
-    api_key=os.environ["GROQ_API_KEY"],
-    base_url="https://api.groq.com/openai/v1",
-)
-LLM_MODEL = "openai/gpt-oss-20b"
-
-# Our business rules. These stay in code.
-DUPLICATE_LIMIT = 0.90   # hold payment at or above this
-RISK_LIMIT = 1.5         # risk score runs from 0 (Low) to 2 (High)
-CONFIDENCE_MIN = 0.80    # below this, a person should check the category
-
-new_invoice = pick_invoice(sys.argv)
-state = {"new_invoice": new_invoice, "paid_invoices": PAID_INVOICES}
-
-# Step 1: ask Jev three questions with fixed answers.
+# Step 1: three questions, each with its allowed answers.
 questions = {
     "category": Choice(
         instructions="Which spend category does the new invoice belong to?",
@@ -665,99 +572,13 @@ questions = {
     ),
 }
 
-print(f"\\nInvoice {new_invoice['invoice_number']}: asking Jev three questions...")
-start = time.perf_counter()
 with TypeSafeClient() as jev:
     response = jev.system_one(state=state, questions=questions)
-jev_seconds = time.perf_counter() - start
 
-category = response.answers["category"]
-risk = response.answers["risk"]
-duplicate = response.answers["duplicate"]
-
-print("\\n--- Jev answers (ready to use, no parsing) ---")
-print(f"Category:   {category.choice}   confidence {category.confidence:.2f}")
-rounded = {label: round(p, 2) for label, p in category.probabilities.items()}
-print(f"            probabilities {rounded}")
-print(f"Risk score: {risk.score:.2f} out of 2   confidence {risk.confidence:.2f}")
-print(f"Duplicate:  P(yes) = {duplicate.noul:.2f}")
-print(f"Jev time:   {jev_seconds:.2f} s")
-
-# Step 2: our code applies the rules.
-reasons = []
-if duplicate.noul >= DUPLICATE_LIMIT:
+# Step 2: the answers are typed, so the rules are plain code.
+duplicate = response.answers["duplicate"].noul
+if duplicate >= DUPLICATE_LIMIT:
     reasons.append("likely duplicate")
-if risk.score >= RISK_LIMIT:
-    reasons.append("high payment risk")
-if category.confidence < CONFIDENCE_MIN:
-    reasons.append("category unclear")
-
-if not reasons:
-    print("\\nDecision: clean invoice. Approve for payment.")
-    print(f"\\nLLM calls: 0   Total time: {jev_seconds:.2f} s")
-    sys.exit(0)
-
-print(f"\\nDecision: hold payment. Reasons: {', '.join(reasons)}.")
-
-# Step 3: build a small handoff for the LLM from Jev's answers.
-handoff = {
-    "invoice": new_invoice["invoice_number"],
-    "vendor": new_invoice["vendor"],
-    "amount": new_invoice["amount"],
-    "category": f"{category.choice} ({category.confidence:.2f})",
-    "risk_score": f"{risk.score:.2f} out of 2",
-    "duplicate_probability": round(duplicate.noul, 2),
-    "hold_reasons": reasons,
-    "task": "Write a short AP review note and a polite email to the vendor.",
-}
-
-print("\\n--- Handoff sent to the LLM ---")
-print(json.dumps(handoff, indent=2))
-
-# Step 4: the LLM only writes.
-start = time.perf_counter()
-reply = llm.chat.completions.create(
-    model=LLM_MODEL,
-    messages=[
-        {
-            "role": "system",
-            "content": "You write short, polite accounts payable messages. "
-            "Use only the facts you are given.",
-        },
-        {"role": "user", "content": json.dumps(handoff)},
-    ],
-)
-llm_seconds = time.perf_counter() - start
-draft = reply.choices[0].message.content
-
-print("\\n--- LLM draft ---")
-print(draft)
-
-# Step 5: Jev checks the draft against our policy.
-start = time.perf_counter()
-with TypeSafeClient() as jev:
-    check = jev.system_one(
-        state={"facts": handoff, "draft": draft},
-        questions={
-            "follows_policy": Noul(
-                instructions="The draft is polite, uses only the facts given, "
-                "does not promise payment, and asks the vendor to confirm "
-                "or send a credit note.",
-            )
-        },
-    )
-check_seconds = time.perf_counter() - start
-policy = check.answers["follows_policy"].noul
-
-print("\\n--- Policy check by Jev ---")
-print(f"Follows policy: P(yes) = {policy:.2f}")
-if policy >= 0.8:
-    print("Send the draft to the AP reviewer for approval.")
-else:
-    print("Send the case to a person to rewrite.")
-
-total = jev_seconds + llm_seconds + check_seconds
-print(f"\\nLLM calls: 1   Jev calls: 2   Total time: {total:.2f} s")
 \`\`\`
 
 For the duplicate invoice it prints something like this:
@@ -858,100 +679,17 @@ If most of your invoices are normal, that is where Jev saves the most. Those inv
 
 ## Run it yourself in VS Code
 
+The whole project is five small files: \`invoice.py\` with the sample data, \`without_jev.py\`, \`with_jev.py\`, \`requirements.txt\` and a README with the setup steps for Windows and macOS.
+
+[Download the demo project (zip, 11 KB)](/downloads/jev-invoice-demo.zip)
+
 You need:
 
-- Python 3.10 or newer
-- VS Code with the Python extension
+- Python 3.10 or newer and VS Code
 - A TypeSafe API key from [console.typesafe.ai](https://console.typesafe.ai/keys). Jev is in early access.
 - A Groq API key from [console.groq.com](https://console.groq.com/keys). The free tier is enough. If you have never made an LLM API call, [start with this walkthrough](/blog/first-llm-api-call-groq/).
 
-**Step 1.** Create a folder called \`jev-invoice-demo\` and open it in VS Code.
-
-**Step 2.** Create \`invoice.py\` with the sample data:
-
-\`\`\`python
-# Sample data for the demo. All names and numbers are made up.
-
-# Invoices our AP team has already paid.
-PAID_INVOICES = [
-    {
-        "invoice_number": "INV-2291",
-        "vendor": "Northwind Supplies",
-        "amount": 4860.00,
-        "po_number": "PO-7741",
-        "paid_on": "2026-03-12",
-    },
-    {
-        "invoice_number": "INV-2240",
-        "vendor": "Northwind Supplies",
-        "amount": 1275.50,
-        "po_number": "PO-7702",
-        "paid_on": "2026-02-20",
-    },
-]
-
-# A new invoice that repeats one we already paid.
-DUPLICATE_INVOICE = {
-    "invoice_number": "INV-2291",
-    "vendor": "Northwind Supplies",
-    "amount": 4860.00,
-    "po_number": "PO-7741",
-    "lines": ["Printer paper, 40 boxes", "Desk organisers, 25 units"],
-    "vendor_note": "Resubmitting the March invoice, please process.",
-}
-
-# A normal new invoice with nothing unusual.
-CLEAN_INVOICE = {
-    "invoice_number": "INV-2317",
-    "vendor": "Northwind Supplies",
-    "amount": 932.40,
-    "po_number": "PO-7790",
-    "lines": ["Whiteboard markers, 60 packs", "Sticky notes, 30 packs"],
-    "vendor_note": "September order as per PO-7790.",
-}
-
-
-def pick_invoice(args):
-    """Use the clean invoice when the script is run with --clean."""
-    if "--clean" in args:
-        return CLEAN_INVOICE
-    return DUPLICATE_INVOICE
-\`\`\`
-
-**Step 3.** Save the two scripts above as \`without_jev.py\` and \`with_jev.py\`.
-
-**Step 4.** Create \`requirements.txt\`:
-
-\`\`\`
-typesafe-sdk
-openai
-python-dotenv
-\`\`\`
-
-**Step 5.** Create a file called \`.env\` with your keys. Keep this file out of Git.
-
-\`\`\`
-TYPESAFE_API_KEY=your_typesafe_key_here
-GROQ_API_KEY=your_groq_key_here
-\`\`\`
-
-**Step 6.** Open a terminal in VS Code and install the packages. On Windows:
-
-\`\`\`powershell
-python -m venv .venv
-.venv\\Scripts\\Activate.ps1
-pip install -r requirements.txt
-\`\`\`
-
-On macOS or Linux:
-
-\`\`\`bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-\`\`\`
-
-**Step 7.** Run both scripts:
+Unzip it, put your keys in a \`.env\` file as the README shows, install the requirements, and run:
 
 \`\`\`bash
 python without_jev.py
@@ -961,6 +699,7 @@ python with_jev.py --clean
 \`\`\`
 
 Compare the number of LLM calls and the time printed at the end of each run. Your numbers will be different from mine, and they change from run to run.
+
 
 ## Does Jev reason like an LLM?
 
